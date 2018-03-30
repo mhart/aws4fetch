@@ -1,0 +1,22 @@
+{
+  "name": "aws4fetch",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/aws4fetch.cjs.js",
+  "module": "dist/aws4fetch.esm.js",
+  "browser": "dist/aws4fetch.umd.js",
+  "author": "Michael Hart <michael.hart.au@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "puppeteer": "^1.11.0",
+    "rollup": "^0.68.0"
+  },
+  "scripts": {
+    "build": "rollup -c",
+    "prepare": "npm run build",
+    "test": "node test/test.js"
+  },
+  "files": [
+    "dist"
+  ]
+}
