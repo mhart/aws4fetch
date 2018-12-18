@@ -41,8 +41,8 @@ export class AwsClient {
     if (input instanceof Request) {
       const { method, url, headers, body } = input
       init = Object.assign({ method, url, headers }, init)
-      if (!init.body && method !== 'GET' && method !== 'HEAD') {
-        init.body = body && headers.has('X-Amz-Content-Sha256') ? body : await input.clone().arrayBuffer()
+      if (init.body == null && headers.has('Content-Type')) {
+        init.body = body != null && headers.has('X-Amz-Content-Sha256') ? body : await input.clone().arrayBuffer()
       }
       input = url
     }
