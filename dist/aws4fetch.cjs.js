@@ -42,26 +42,31 @@ class AwsClient {
   }
 
   async sign(input, init) {
-    const signer = new AwsV4Signer(input, Object.assign({}, init, this, init.aws));
-    const signed = Object.assign({}, init);
+    if (input instanceof Request) {
+      const { method, url, headers, body } = input;
+      init = Object.assign({ method, url, headers }, init);
+      if (!init.body && method !== 'GET' && method !== 'HEAD') {
+        init.body = body && headers.has('X-Amz-Content-Sha256') ? body : await input.clone().arrayBuffer();
+      }
+      input = url;
+    }
+    const signer = new AwsV4Signer(input, Object.assign({}, init, this, init && init.aws));
+    const signed = Object.assign({}, init, await signer.sign());
     delete signed.aws;
-    return Object.assign(signed, await signer.sign())
+    return new Request(signed.url, signed)
   }
 
   async fetch(input, init) {
-    const options = Object.assign({}, this, init.aws);
-
-    for (let i = 0; i <= options.retries; i++) {
-      const signed = await this.sign(input, init);
-      const fetched = fetch(signed.url, signed);
-      if (i === options.retries) {
+    for (let i = 0; i <= this.retries; i++) {
+      const fetched = fetch(await this.sign(input, init));
+      if (i === this.retries) {
         return fetched // No need to await if we're returning anyway
       }
       const res = await fetched;
       if (res.status < 500 && res.status !== 429) {
         return res
       }
-      await new Promise(resolve => setTimeout(resolve, Math.random() * options.initRetryMs * Math.pow(2, i)));
+      await new Promise(resolve => setTimeout(resolve, Math.random() * this.initRetryMs * Math.pow(2, i)));
     }
   }
 }

@@ -309,11 +309,11 @@ void (async() => {
 async function getSignedTests(tests, browser) {
   const rollupFile = path.join(os.tmpdir(), 'aws4fetch.integration.test.js')
   fs.writeFileSync(rollupFile, `
-    import {AwsV4Signer} from '${__dirname}/../src/main'
+    import { AwsV4Signer } from '${__dirname}/../src/main'
     Promise.all(${JSON.stringify(tests)}.map(async(options) => {
       let signer = new AwsV4Signer(options.url, options)
       let canonicalString = await signer.canonicalString()
-      let {method, url, headers, body} = await signer.sign()
+      let { method, url, headers, body } = await signer.sign()
       return {
         canonicalString,
         method,
