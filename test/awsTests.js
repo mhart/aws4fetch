@@ -22,8 +22,9 @@ async function awsTest({ test, method, url, headers, body, canonicalString, stri
 
   const securityToken = reqHeaders.get('X-Amz-Security-Token')
 
-  const signer = new AwsV4Signer(url, {
+  const signer = new AwsV4Signer({
     method,
+    url,
     headers: reqHeaders,
     body,
     accessKeyId,

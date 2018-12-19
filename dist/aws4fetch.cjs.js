@@ -45,12 +45,12 @@ class AwsClient {
     if (input instanceof Request) {
       const { method, url, headers, body } = input;
       init = Object.assign({ method, url, headers }, init);
-      if (!init.body && method !== 'GET' && method !== 'HEAD') {
-        init.body = body && headers.has('X-Amz-Content-Sha256') ? body : await input.clone().arrayBuffer();
+      if (init.body == null && headers.has('Content-Type')) {
+        init.body = body != null && headers.has('X-Amz-Content-Sha256') ? body : await input.clone().arrayBuffer();
       }
       input = url;
     }
-    const signer = new AwsV4Signer(input, Object.assign({}, init, this, init && init.aws));
+    const signer = new AwsV4Signer(Object.assign({ url: input }, init, this, init && init.aws));
     const signed = Object.assign({}, init, await signer.sign());
     delete signed.aws;
     return new Request(signed.url, signed)
@@ -72,31 +72,31 @@ class AwsClient {
 }
 
 class AwsV4Signer {
-  constructor(url, options = {}) {
-    if (url == null) throw new TypeError('url is a required argument')
-    if (options.accessKeyId == null) throw new TypeError('accessKeyId is a required option')
-    if (options.secretAccessKey == null) throw new TypeError('secretAccessKey is a required option')
+  constructor({ method, url, headers, body, accessKeyId, secretAccessKey, sessionToken, service, region, cache, datetime, signQuery, appendSessionToken, allHeaders, singleEncode }) {
+    if (url == null) throw new TypeError('url is a required option')
+    if (accessKeyId == null) throw new TypeError('accessKeyId is a required option')
+    if (secretAccessKey == null) throw new TypeError('secretAccessKey is a required option')
 
-    this.method = options.method || (options.body ? 'POST' : 'GET');
+    this.method = method || (body ? 'POST' : 'GET');
     this.url = new URL(url);
-    this.headers = new Headers(options.headers);
-    this.body = options.body;
+    this.headers = new Headers(headers);
+    this.body = body;
 
-    this.accessKeyId = options.accessKeyId;
-    this.secretAccessKey = options.secretAccessKey;
-    this.sessionToken = options.sessionToken;
+    this.accessKeyId = accessKeyId;
+    this.secretAccessKey = secretAccessKey;
+    this.sessionToken = sessionToken;
 
-    let service, region;
-    if (!options.service || !options.region) {
-[service, region] = guessServiceRegion(this.url, this.headers);
+    let guessedService, guessedRegion;
+    if (!service || !region) {
+[guessedService, guessedRegion] = guessServiceRegion(this.url, this.headers);
     }
-    this.service = options.service || service;
-    this.region = options.region || region;
+    this.service = service || guessedService;
+    this.region = region || guessedRegion;
 
-    this.cache = options.cache || new Map();
-    this.datetime = options.datetime || new Date().toISOString().replace(/[:-]|\.\d{3}/g, '');
-    this.signQuery = options.signQuery;
-    this.appendSessionToken = options.appendSessionToken || this.service === 'iotdevicegateway';
+    this.cache = cache || new Map();
+    this.datetime = datetime || new Date().toISOString().replace(/[:-]|\.\d{3}/g, '');
+    this.signQuery = signQuery;
+    this.appendSessionToken = appendSessionToken || this.service === 'iotdevicegateway';
 
     this.headers.delete('Host'); // Can't be set in insecure env anyway
 
@@ -112,7 +112,7 @@ class AwsV4Signer {
 
     // headers are always lowercase in keys()
     this.signableHeaders = ['host', ...this.headers.keys()]
-      .filter(header => options.allHeaders || !UNSIGNABLE_HEADERS.includes(header))
+      .filter(header => allHeaders || !UNSIGNABLE_HEADERS.includes(header))
       .sort();
 
     this.signedHeaders = this.signableHeaders.join(';');
@@ -136,7 +136,7 @@ class AwsV4Signer {
 
     this.encodedPath =
       this.service === 's3' ? decodeURIComponent(this.url.pathname) : this.url.pathname.replace(/\/+/g, '/');
-    if (!options.singleEncode) {
+    if (!singleEncode) {
       this.encodedPath = encodeURIComponent(this.encodedPath).replace(/%2F/g, '/');
     }
 

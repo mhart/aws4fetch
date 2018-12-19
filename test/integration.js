@@ -311,7 +311,7 @@ async function getSignedTests(tests, browser) {
   fs.writeFileSync(rollupFile, `
     import { AwsV4Signer } from '${__dirname}/../src/main'
     Promise.all(${JSON.stringify(tests)}.map(async(options) => {
-      let signer = new AwsV4Signer(options.url, options)
+      let signer = new AwsV4Signer(options)
       let canonicalString = await signer.canonicalString()
       let { method, url, headers, body } = await signer.sign()
       return {

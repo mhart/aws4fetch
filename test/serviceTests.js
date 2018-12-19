@@ -2,7 +2,7 @@ import { AwsV4Signer } from '../src/main'
 
 export default async() => {
   fixtures().forEach(({ url, service, region }) => {
-    let signer = new AwsV4Signer(url, { accessKeyId: 'a', secretAccessKey: 'a' })
+    let signer = new AwsV4Signer({ url, accessKeyId: 'a', secretAccessKey: 'a' })
     console.assert(signer.service === service, `Expected service ${service}, got ${signer.service} for url ${url}`)
     console.assert(signer.region === region, `Expected region ${region}, got ${signer.region} for url ${url}`)
   })
