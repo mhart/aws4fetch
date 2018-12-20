@@ -29,6 +29,9 @@ async function invokeMyLambda(event) {
 invokeMyLambda({my: 'event'}).then(json => console.log(json))
 ```
 
+You can see a more detailed example, a Cloudflare Worker script you can use as
+a replacement for [API Gateway](https://aws.amazon.com/api-gateway/), in the [`example`](./example) directory.
+
 # API
 
 `aws4fetch` exports two classes: `AwsClient` and `AwsV4Signer`
