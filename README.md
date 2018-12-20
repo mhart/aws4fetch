@@ -2,7 +2,7 @@
 
 <!-- [![Build Status](https://secure.travis-ci.org/mhart/aws4fetch.png?branch=master)](http://travis-ci.org/mhart/aws4fetch) -->
 
-A compact (6.3kb minified, 2.4kb gzipped) [AWS](https://aws.amazon.com/) client for environments that support
+A compact (6.4kb minified, 2.5kb gzipped) [AWS](https://aws.amazon.com/) client for environments that support
 [`fetch`](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) and
 [`SubtleCrypto`](https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto) – that is, modern web browsers and
 JS platforms like [Cloudflare Workers](https://www.cloudflare.com/products/cloudflare-workers/). Also retries
@@ -60,11 +60,6 @@ const aws = new AwsClient({
 
 Has the same signature as the [global fetch function](https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch#Syntax)
 
-NB: Due to the way bodies are handled in [`Request`](https://developer.mozilla.org/en-US/docs/Web/API/Request)
-instances, it's faster to invoke the function using a URL as the `input`
-argument (instead of a `Request`) and pass the `body` in the `init` argument –
-as in the example below.
-
 ```js
 import { AwsClient } from 'aws4fetch'
 
@@ -100,7 +95,14 @@ async function doFetch() {
 }
 ```
 
-The full list of AWS endpoints can be found here: https://docs.aws.amazon.com/general/latest/gr/rande.html
+NB: Due to the way bodies are handled in [`Request`](https://developer.mozilla.org/en-US/docs/Web/API/Request)
+instances, it's faster to invoke the function as above – using a URL as the `input`
+argument and passing the `body` in the `init` argument – instead of the form of
+invocation that uses a `Request` object directly as `input`.
+
+If you don't know which URL to call for the AWS service you want, the full list
+of AWS endpoints can be found here:
+https://docs.aws.amazon.com/general/latest/gr/rande.html
 
 And the APIs are documented here: https://docs.aws.amazon.com/ (the REST APIs
 are usually documented under "API Reference" for each service)
