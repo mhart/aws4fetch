@@ -68,13 +68,22 @@ export class AwsClient {
 }
 
 export class AwsV4Signer {
-  constructor({ method, url, headers, body, accessKeyId, secretAccessKey, sessionToken, service, region, cache, datetime, signQuery, appendSessionToken, allHeaders, singleEncode }) {
+  constructor({ method, url, proxyTo = null, headers, body, accessKeyId, secretAccessKey, sessionToken, service, region, cache, datetime, signQuery, appendSessionToken, allHeaders, singleEncode }) {
     if (url == null) throw new TypeError('url is a required option')
     if (accessKeyId == null) throw new TypeError('accessKeyId is a required option')
     if (secretAccessKey == null) throw new TypeError('secretAccessKey is a required option')
 
     this.method = method || (body ? 'POST' : 'GET')
-    this.url = new URL(url)
+    
+    // if `proxyTo` is present, sign with the destination URL
+    if (proxyTo) {
+      this.url = new URL(proxyTo)
+    } else {
+      this.url = new URL(url)
+    }
+    // where the actual fetch request will be made
+    this.fetchUrl = new URL(url)
+
     this.headers = new Headers(headers)
     this.body = body
 
@@ -163,7 +172,7 @@ export class AwsV4Signer {
 
     return {
       method: this.method,
-      url: this.url,
+      url: this.fetchUrl,
       headers: this.headers,
       body: this.body,
     }
