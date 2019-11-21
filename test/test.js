@@ -5,7 +5,7 @@ const rollup = require('rollup')
 
 void (async() => {
   const bundle = await rollup.rollup({ input: path.join(__dirname, 'suite.js') })
-  const { code } = await bundle.generate({ format: 'es', intro: `self.AWS_FIXTURES = ${JSON.stringify(awsFixtures())};` })
+  const { output: [{ code }] } = await bundle.generate({ format: 'es', intro: `self.AWS_FIXTURES = ${JSON.stringify(awsFixtures())};` })
 
   const browser = await puppeteer.launch()
   const page = await browser.newPage()
