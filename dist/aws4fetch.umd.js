@@ -27,6 +27,7 @@
     'presigned-expires',
     'expect',
     'x-amzn-trace-id',
+    'range',
   ];
 
   class AwsClient {
