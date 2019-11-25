@@ -40,7 +40,7 @@ async function awsTest({ test, method, url, headers, body, canonicalString, stri
   console.assert(reqCanonicalString === canonicalString, `${test}: Expected canonicalString ${canonicalString}, got ${reqCanonicalString}`)
 
   const reqStringToSign = await signer.stringToSign()
-  console.assert(reqStringToSign === stringToSign, `${test}: Expected stringToSign ${canonicalString}, got ${reqCanonicalString}`)
+  console.assert(reqStringToSign === stringToSign, `${test}: Expected stringToSign ${stringToSign}, got ${reqStringToSign}`)
 
   const reqAuthHeader = await signer.authHeader()
   console.assert(reqAuthHeader === authHeader, `${test}: Expected authHeader ${authHeader}, got ${reqAuthHeader}`)
