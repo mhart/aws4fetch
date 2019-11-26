@@ -14,7 +14,7 @@ void (async() => {
     '/ü',
     '/€',
     '/%41',
-    '/!\'()*%21%27%28%29%2A',
+    '/!\'()*@%21%27%28%29%2A',
     '/%2a',
     '/%2f%2f',
     '/ü%41',
@@ -29,7 +29,7 @@ void (async() => {
   ]
 
   let tests = [{
-    url: 'https://runtime.sagemaker.us-east-1.amazonaws.com/a=b~ and c * \' (whatever)!?a=b~ and c * \' (whatever)!',
+    url: 'https://runtime.sagemaker.us-east-1.amazonaws.com/a=b~ and c * \' (whatever)!?a=b~ and c * \' @(whatever)!',
     signQuery: true,
     method: 'POST',
     headers: {
@@ -39,7 +39,7 @@ void (async() => {
     },
     body: '{}',
   }, {
-    url: 'https://runtime.sagemaker.us-east-1.amazonaws.com/a=b~ and c * \' (whatever)!?a=b~ and c * \' (whatever)!',
+    url: 'https://runtime.sagemaker.us-east-1.amazonaws.com/a=b~ and c * \' (whatever)!?a=b~ and c * \' @(whatever)!',
     signQuery: true,
     method: 'POST',
     headers: {
@@ -68,6 +68,7 @@ void (async() => {
   tests.forEach(test => {
     test.accessKeyId = process.env.AWS_ACCESS_KEY_ID
     test.secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY
+    test.sessionToken = process.env.AWS_SESSION_TOKEN
   })
 
   let okTests = [{
@@ -81,7 +82,7 @@ void (async() => {
   }, {
     url: 'https://sns.us-east-1.amazonaws.com/?Action=ListTopics&Version=2010-03-31',
   }, {
-    url: 'https://sts.us-east-1.amazonaws.com/?Action=GetSessionToken&Version=2011-06-15',
+    url: 'https://sts.us-east-1.amazonaws.com/?Action=GetCallerIdentity&Version=2011-06-15',
   }, {
     url: 'https://cloudsearch.us-east-1.amazonaws.com/?Action=ListDomainNames&Version=2013-01-01',
   }, {
@@ -257,6 +258,7 @@ void (async() => {
   okTests.forEach(test => {
     test.accessKeyId = process.env.AWS_ACCESS_KEY_ID
     test.secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY
+    test.sessionToken = process.env.AWS_SESSION_TOKEN
   })
 
   const browser = await puppeteer.launch()
@@ -325,7 +327,7 @@ async function getSignedTests(tests, browser) {
     }))
   `)
   const bundle = await rollup.rollup({ input: rollupFile })
-  const { code } = await bundle.generate({ format: 'es' })
+  const { output: [{ code }] } = await bundle.generate({ format: 'es' })
   const page = await browser.newPage()
   await page.goto(`file:///dev/null`)
   return page.evaluate(code)
