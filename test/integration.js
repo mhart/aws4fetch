@@ -8,7 +8,7 @@ const rollup = require('rollup')
 https.globalAgent.maxSockets = 10
 
 void (async() => {
-  const bigStr = [...Array(256).keys()].slice(1).map(c => String.fromCharCode(c)).join('')
+  const bigStr = [...Array(256).keys()].slice(1).map(c => String.fromCharCode(c)).join('').replace(/#/g, '')
 
   let paths = [
     '/ü',
@@ -24,7 +24,7 @@ void (async() => {
     '/?a=b&a=B&a=b&a=c',
     '//a/b/..//c/.?a=b',
     '//a/b/..//c/./?a=b',
-    // '/?&a=&&=&%41&',
+    '/?a=A&*=a&@=b',
     `/${bigStr}//${encodeURIComponent(bigStr)}?${bigStr}=${bigStr}`,
   ]
 
@@ -50,14 +50,14 @@ void (async() => {
     },
     body: '{}',
   }, {
-    url: 'https://s3.amazonaws.com/test//`@#$^&*()-_+[]{}\\|;:.,<>€ü%41=b~ and c * \' //(whatever)!?€ü`@#$^&*()-_+[]{}\\|;:.,<>=`@#$^&*()-_+[]{}\\|;:.,<>%41€üab~ and c * \' (whatever)!',
+    url: 'https://s3.amazonaws.com/test//`@$^&*()-_+[]{}\\|;:.,<>€ü%41=b~ and c * \' //(whatever)!?€ü`@$^&*()-_+[]{}\\|;:.,<>=`@$^&*()-_+[]{}\\|;:.,<>%41€üab~ and c * \' (whatever)!',
     method: 'POST',
-    body: '{}',
+    body: '',
   }, {
-    url: 'https://s3.amazonaws.com/test//`@#$^&*()-_+[]{}\\|;:.,<>€ü%41=b~ and c * \' //(whatever)!?€ü`@#$^&*()-_+[]{}\\|;:.,<>=`@#$^&*()-_+[]{}\\|;:.,<>%41€üab~ and c * \' (whatever)!',
+    url: 'https://s3.amazonaws.com/test//`@$^&*()-_+[]{}\\|;:.,<>€ü%41=b~ and c * \' //(whatever)!?€ü`@$^&*()-_+[]{}\\|;:.,<>=`@$^&*()-_+[]{}\\|;:.,<>%41€üab~ and c * \' (whatever)!',
     signQuery: true,
     method: 'POST',
-    body: '{}',
+    body: '',
   }]
 
   paths.forEach(p => tests.push({ url: `https://s3.amazonaws.com/test${p}` }))
@@ -341,7 +341,7 @@ async function request(options) {
     const onError = err => {
       if (RETRY_ERRS.includes(err.code) && options.retries < 5) {
         options.retries++
-        return request(options)
+        return request(options).then(resolve).catch(reject)
       }
       reject(err)
     }

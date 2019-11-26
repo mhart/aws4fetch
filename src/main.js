@@ -131,11 +131,19 @@ export class AwsV4Signer {
       params.set('X-Amz-SignedHeaders', this.signedHeaders)
     }
 
-    this.encodedPath =
-      this.service === 's3' ? decodeURIComponent(this.url.pathname) : this.url.pathname.replace(/\/+/g, '/')
+    if (this.service === 's3') {
+      try {
+        this.encodedPath = decodeURIComponent(this.url.pathname).replace(/\+/g, ' ')
+      } catch (e) {
+        this.encodedPath = this.url.pathname
+      }
+    } else {
+      this.encodedPath = this.url.pathname.replace(/\/+/g, '/')
+    }
     if (!singleEncode) {
       this.encodedPath = encodeURIComponent(this.encodedPath).replace(/%2F/g, '/')
     }
+    this.encodedPath = encodeRfc3986(this.encodedPath)
 
     const seenKeys = new Set()
     this.encodedSearch = [...this.url.searchParams]
@@ -147,7 +155,7 @@ export class AwsV4Signer {
         }
         return true
       })
-      .map(pair => pair.map(encodeURIComponent).join('='))
+      .map(pair => pair.map(p => encodeRfc3986(encodeURIComponent(p))).join('='))
       .sort()
       .join('&')
   }
@@ -204,8 +212,8 @@ export class AwsV4Signer {
   async canonicalString() {
     return [
       this.method,
-      encodeRfc3986(this.encodedPath),
-      encodeRfc3986(this.encodedSearch),
+      this.encodedPath,
+      this.encodedSearch,
       this.canonicalHeaders + '\n',
       this.signedHeaders,
       await this.hexBodyHash(),
