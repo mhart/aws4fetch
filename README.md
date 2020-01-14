@@ -226,12 +226,12 @@ Or you can also reference different formats straight from unpkg.com:
 
 [ES Modules](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import):
 
-https://unpkg.com/aws4fetch@1.0.2/dist/aws4fetch.esm.js
+https://unpkg.com/aws4fetch@1.0.3/dist/aws4fetch.esm.js
 
 [UMD](https://github.com/umdjs/umd):
 
-https://unpkg.com/aws4fetch@1.0.2/dist/aws4fetch.umd.js
+https://unpkg.com/aws4fetch@1.0.3/dist/aws4fetch.umd.js
 
 [CommonJS](https://requirejs.org/docs/commonjs.html):
 
-https://unpkg.com/aws4fetch@1.0.2/dist/aws4fetch.cjs.js
+https://unpkg.com/aws4fetch@1.0.3/dist/aws4fetch.cjs.js

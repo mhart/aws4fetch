@@ -25,12 +25,12 @@ void (async() => {
     '//a/b/..//c/.?a=b',
     '//a/b/..//c/./?a=b',
     '/?a=A&*=a&@=b',
+    '/?a-=a&a=b&a=B&a=b&a=c',
     `/${bigStr}//${encodeURIComponent(bigStr)}?${bigStr}=${bigStr}`,
   ]
 
   let tests = [{
     url: 'https://runtime.sagemaker.us-east-1.amazonaws.com/a=b~ and c * \' (whatever)!?a=b~ and c * \' @(whatever)!',
-    signQuery: true,
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-amz-json-1.1',

@@ -14,7 +14,8 @@
   "scripts": {
     "build": "rollup -c",
     "prepare": "npm run build",
-    "test": "node test/test.js"
+    "test": "node test/test.js",
+    "integration": "node test/integration.js"
   },
   "files": [
     "dist"

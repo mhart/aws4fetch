@@ -155,8 +155,9 @@ class AwsV4Signer {
         }
         return true
       })
-      .map(pair => pair.map(p => encodeRfc3986(encodeURIComponent(p))).join('='))
-      .sort()
+      .map(pair => pair.map(p => encodeRfc3986(encodeURIComponent(p))))
+      .sort(([k1, v1], [k2, v2]) => k1 < k2 ? -1 : k1 > k2 ? 1 : v1 < v2 ? -1 : v1 > v2 ? 1 : 0)
+      .map(pair => pair.join('='))
       .join('&');
   }
 
