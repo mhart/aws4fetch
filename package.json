@@ -8,8 +8,8 @@
   "author": "Michael Hart <michael.hart.au@gmail.com>",
   "license": "MIT",
   "devDependencies": {
-    "puppeteer": "^2.0.0",
-    "rollup": "^1.27.3"
+    "puppeteer": "^2.1.1",
+    "rollup": "^2.3.3"
   },
   "scripts": {
     "build": "rollup -c",
