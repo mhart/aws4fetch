@@ -31,7 +31,7 @@ void (async() => {
 
   let tests = [{
     url: 'https://runtime.sagemaker.us-east-1.amazonaws.com/a=b~ and c * \' (whatever)!?a=b~ and c * \' @(whatever)!',
-    method: 'POST',
+    method: 'post',
     headers: {
       'Content-Type': 'application/x-amz-json-1.1',
       'Accept': 'application/json',
@@ -306,6 +306,8 @@ void (async() => {
   }
 
   await browser.close()
+
+  console.log('Tests complete')
 })()
 
 async function getSignedTests(tests, browser) {

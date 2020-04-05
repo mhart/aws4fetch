@@ -212,7 +212,7 @@ export class AwsV4Signer {
 
   async canonicalString() {
     return [
-      this.method,
+      this.method.toUpperCase(),
       this.encodedPath,
       this.encodedSearch,
       this.canonicalHeaders + '\n',
