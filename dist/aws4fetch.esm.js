@@ -10,6 +10,7 @@ const HOST_SERVICES = {
   'mturk-requester-sandbox': 'mturk-requester',
   'pinpoint': 'mobiletargeting',
   'queue': 'sqs',
+  'personalize-runtime': 'personalize',
 };
 
 // https://github.com/aws/aws-sdk-js/blob/cc29728c1c4178969ebabe3bbe6b6f3159436394/lib/signers/v4.js#L190-L198

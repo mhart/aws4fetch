@@ -48,6 +48,7 @@ metering.marketplace.us-east-1.amazonaws.com,aws-marketplace,us-east-1
 mobile.us-east-1.amazonaws.com,AWSMobileHubService,us-east-1
 models.lex.us-east-1.amazonaws.com,lex,us-east-1
 mturk-requester-sandbox.us-east-1.amazonaws.com,mturk-requester,us-east-1
+personalize-runtime.us-west-2.amazonaws.com,personalize,us-west-2
 pinpoint.us-east-1.amazonaws.com,mobiletargeting,us-east-1
 queue.amazonaws.com,sqs,us-east-1
 route53.amazonaws.com,route53,us-east-1
