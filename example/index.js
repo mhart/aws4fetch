@@ -1,8 +1,8 @@
 import { AwsClient } from 'aws4fetch'
 
-const aws = new AwsClient({ accessKeyId: AWS_ACCESS_KEY_ID, secretAccessKey: AWS_SECRET_ACCESS_KEY })
 // Assume AWS_* vars have added to your environment
 // https://developers.cloudflare.com/workers/reference/apis/environment-variables/#secrets
+const aws = new AwsClient({ accessKeyId: AWS_ACCESS_KEY_ID, secretAccessKey: AWS_SECRET_ACCESS_KEY }) // eslint-disable-line no-undef
 
 const LAMBDA_FN = 'my-api-function'
 

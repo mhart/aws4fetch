@@ -2,14 +2,14 @@ import { AwsV4Signer } from '../src/main'
 
 export default async() => {
   fixtures().forEach(({ url, service, region }) => {
-    let signer = new AwsV4Signer({ url, accessKeyId: 'a', secretAccessKey: 'a' })
+    const signer = new AwsV4Signer({ url, accessKeyId: 'a', secretAccessKey: 'a' })
     console.assert(signer.service === service, `Expected service ${service}, got ${signer.service} for url ${url}`)
     console.assert(signer.region === region, `Expected region ${region}, got ${signer.region} for url ${url}`)
   })
 }
 
 function fixtures() {
-  let csv = `
+  const csv = `
 aa-custom-endpoint.execute-api.us-east-1.amazonaws.com,execute-api,us-east-1
 aa-custom-endpoint.iot.us-east-1.amazonaws.com/topics,iotdata,us-east-1
 aa-custom-endpoint.iot.us-east-1.amazonaws.com/things,iotdata,us-east-1
@@ -75,7 +75,7 @@ waf-regional.us-west-2.amazonaws.com,waf-regional,us-west-2
 waf.amazonaws.com,waf,us-east-1
   `
   return csv.trim().split('\n').map(line => {
-    let [url, service, region] = line.split(',')
+    const [url, service, region] = line.split(',')
     return { url: `https://${url}`, service, region }
   })
 }

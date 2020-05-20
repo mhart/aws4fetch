@@ -7,15 +7,15 @@
   const encoder = new TextEncoder('utf-8');
 
   const HOST_SERVICES = {
-    'appstream2': 'appstream',
-    'cloudhsmv2': 'cloudhsm',
-    'email': 'ses',
+    appstream2: 'appstream',
+    cloudhsmv2: 'cloudhsm',
+    email: 'ses',
     'git-codecommit': 'codecommit',
-    'marketplace': 'aws-marketplace',
-    'mobile': 'AWSMobileHubService',
+    marketplace: 'aws-marketplace',
+    mobile: 'AWSMobileHubService',
     'mturk-requester-sandbox': 'mturk-requester',
-    'pinpoint': 'mobiletargeting',
-    'queue': 'sqs',
+    pinpoint: 'mobiletargeting',
+    queue: 'sqs',
     'personalize-runtime': 'personalize',
   };
 
@@ -243,7 +243,7 @@
       typeof key === 'string' ? encoder.encode(key) : key,
       { name: 'HMAC', hash: { name: 'SHA-256' } },
       false,
-      ['sign']
+      ['sign'],
     );
     const signed = await crypto.subtle.sign('HMAC', cryptoKey, encoder.encode(string));
     return encoding === 'hex' ? buf2hex(signed) : signed

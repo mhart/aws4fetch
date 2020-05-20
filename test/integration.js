@@ -7,10 +7,10 @@ const rollup = require('rollup')
 
 https.globalAgent.maxSockets = 10
 
-void (async() => {
+;(async() => {
   const bigStr = [...Array(256).keys()].slice(1).map(c => String.fromCharCode(c)).join('').replace(/#/g, '')
 
-  let paths = [
+  const paths = [
     '/ü',
     '/€',
     '/%41',
@@ -29,12 +29,12 @@ void (async() => {
     `/${bigStr}//${encodeURIComponent(bigStr)}?${bigStr}=${bigStr}`,
   ]
 
-  let tests = [{
+  const tests = [{
     url: 'https://runtime.sagemaker.us-east-1.amazonaws.com/a=b~ and c * \' (whatever)!?a=b~ and c * \' @(whatever)!',
     method: 'post',
     headers: {
       'Content-Type': 'application/x-amz-json-1.1',
-      'Accept': 'application/json',
+      Accept: 'application/json',
       'Accept-Encoding': 'gzip, deflate, br',
     },
     body: '{}',
@@ -44,7 +44,7 @@ void (async() => {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-amz-json-1.1',
-      'Accept': 'application/json',
+      Accept: 'application/json',
       'Accept-Encoding': 'gzip, deflate, br',
       'X-Amz-Target': 'SageMaker.ListEndpoints',
     },
@@ -331,7 +331,7 @@ async function getSignedTests(tests, browser) {
   const bundle = await rollup.rollup({ input: rollupFile })
   const { output: [{ code }] } = await bundle.generate({ format: 'es' })
   const page = await browser.newPage()
-  await page.goto(`file:///dev/null`)
+  await page.goto('file:///dev/null')
   return page.evaluate(code)
 }
 
@@ -348,7 +348,7 @@ async function request(options) {
       reject(err)
     }
     https.request(options, res => {
-      let bufs = []
+      const bufs = []
       res.on('error', onError)
       res.on('data', bufs.push.bind(bufs))
       res.on('end', () => {
