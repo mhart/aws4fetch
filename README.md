@@ -14,6 +14,7 @@ strategy by default.
 ```js
 import { AwsClient } from 'aws4fetch'
 
+// https://developers.cloudflare.com/workers/api/resource-bindings/secrets-vault/
 const aws = new AwsClient({ accessKeyId: MY_ACCESS_KEY, secretAccessKey: MY_SECRET_KEY })
 
 // https://docs.aws.amazon.com/lambda/latest/dg/API_Invoke.html
