@@ -9,13 +9,16 @@
   "author": "Michael Hart <michael.hart.au@gmail.com>",
   "license": "MIT",
   "devDependencies": {
+    "dtslint": "^3.6.3",
     "puppeteer": "^2.1.1",
-    "rollup": "^2.3.3"
+    "rollup": "^2.3.3",
+    "typescript": "^3.9.3"
   },
   "scripts": {
     "build": "rollup -c",
+    "dtslint": "dtslint --expectOnly types",
     "prepare": "npm run build",
-    "test": "node test/test.js",
+    "test": "node test/test.js && npm run dtslint",
     "integration": "node test/integration.js"
   },
   "files": [
