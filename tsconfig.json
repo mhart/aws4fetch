@@ -1,0 +1,14 @@
+{
+  "files": [
+    "src/main.js"
+  ],
+  "compilerOptions": {
+    "target": "ES2016",
+    "allowJs": true,
+    "noEmit": true,
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "noUnusedLocals": true
+  }
+}

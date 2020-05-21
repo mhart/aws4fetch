@@ -2,7 +2,7 @@
   "name": "aws4fetch-example",
   "version": "1.0.0",
   "devDependencies": {
-    "rollup": "^2.3.3"
+    "rollup": "^2.10.5"
   },
   "scripts": {
     "build": "rollup index.js --format es -o worker.js"

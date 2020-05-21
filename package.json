@@ -9,12 +9,22 @@
   "author": "Michael Hart <michael.hart.au@gmail.com>",
   "license": "MIT",
   "devDependencies": {
-    "puppeteer": "^2.1.1",
-    "rollup": "^2.3.3"
+    "eslint": "^7.0.0",
+    "eslint-config-standard": "^14.1.1",
+    "eslint-plugin-import": "^2.20.2",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.1",
+    "puppeteer": "^3.1.0",
+    "rollup": "^2.10.5",
+    "rollup-plugin-cleanup": "^3.1.1",
+    "typescript": "^3.9.3"
   },
   "scripts": {
-    "build": "rollup -c",
+    "declaration": "tsc -p declaration.tsconfig.json --outFile dist/aws4fetch.d.ts",
+    "build": "npm run declaration && rollup -c",
     "prepare": "npm run build",
+    "lint": "eslint .",
     "test": "node test/test.js",
     "integration": "node test/integration.js"
   },

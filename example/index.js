@@ -1,4 +1,4 @@
-import { AwsClient } from 'aws4fetch'
+import { AwsClient } from '../src/main'
 
 // Assume AWS_* vars have added to your environment
 // https://developers.cloudflare.com/workers/reference/apis/environment-variables/#secrets
@@ -21,12 +21,12 @@ async function handle(event) {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Headers': 'Content-Type,Authorization',
         'Access-Control-Allow-Methods': 'GET,OPTIONS,POST',
-        'Access-Control-Max-Age': 86400,
+        'Access-Control-Max-Age': '86400',
       },
     })
   }
 
-  // https://developers.cloudflare.com/workers/reference/cache-api/
+  // https://developers.cloudflare.com/workers/reference/apis/cache/
   const cache = caches.default
 
   const isCacheable = ['GET', 'HEAD'].includes(method)

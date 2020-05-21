@@ -1,19 +1,20 @@
-const encoder = new TextEncoder('utf-8');
-
+/**
+ * @license MIT <https://opensource.org/licenses/MIT>
+ * @copyright Michael Hart 2018
+ */
+const encoder = new TextEncoder();
 const HOST_SERVICES = {
   appstream2: 'appstream',
   cloudhsmv2: 'cloudhsm',
   email: 'ses',
-  'git-codecommit': 'codecommit',
   marketplace: 'aws-marketplace',
   mobile: 'AWSMobileHubService',
-  'mturk-requester-sandbox': 'mturk-requester',
   pinpoint: 'mobiletargeting',
   queue: 'sqs',
+  'git-codecommit': 'codecommit',
+  'mturk-requester-sandbox': 'mturk-requester',
   'personalize-runtime': 'personalize',
 };
-
-// https://github.com/aws/aws-sdk-js/blob/cc29728c1c4178969ebabe3bbe6b6f3159436394/lib/signers/v4.js#L190-L198
 const UNSIGNABLE_HEADERS = [
   'authorization',
   'content-type',
@@ -24,7 +25,6 @@ const UNSIGNABLE_HEADERS = [
   'x-amzn-trace-id',
   'range',
 ];
-
 class AwsClient {
   constructor({ accessKeyId, secretAccessKey, sessionToken, service, region, cache, retries, initRetryMs }) {
     if (accessKeyId == null) throw new TypeError('accessKeyId is a required option')
@@ -35,10 +35,9 @@ class AwsClient {
     this.service = service;
     this.region = region;
     this.cache = cache || new Map();
-    this.retries = retries != null ? retries : 10; // Up to 25.6 secs
+    this.retries = retries != null ? retries : 10;
     this.initRetryMs = initRetryMs || 50;
   }
-
   async sign(input, init) {
     if (input instanceof Request) {
       const { method, url, headers, body } = input;
@@ -51,14 +50,13 @@ class AwsClient {
     const signer = new AwsV4Signer(Object.assign({ url: input }, init, this, init && init.aws));
     const signed = Object.assign({}, init, await signer.sign());
     delete signed.aws;
-    return new Request(signed.url, signed)
+    return new Request(signed.url.toString(), signed)
   }
-
   async fetch(input, init) {
     for (let i = 0; i <= this.retries; i++) {
       const fetched = fetch(await this.sign(input, init));
       if (i === this.retries) {
-        return fetched // No need to await if we're returning anyway
+        return fetched
       }
       const res = await fetched;
       if (res.status < 500 && res.status !== 429) {
@@ -66,72 +64,56 @@ class AwsClient {
       }
       await new Promise(resolve => setTimeout(resolve, Math.random() * this.initRetryMs * Math.pow(2, i)));
     }
+    throw new Error('An unknown error occurred, ensure retries is not negative')
   }
 }
-
 class AwsV4Signer {
   constructor({ method, url, headers, body, accessKeyId, secretAccessKey, sessionToken, service, region, cache, datetime, signQuery, appendSessionToken, allHeaders, singleEncode }) {
     if (url == null) throw new TypeError('url is a required option')
     if (accessKeyId == null) throw new TypeError('accessKeyId is a required option')
     if (secretAccessKey == null) throw new TypeError('secretAccessKey is a required option')
-
     this.method = method || (body ? 'POST' : 'GET');
     this.url = new URL(url);
     this.headers = new Headers(headers);
     this.body = body;
-
     this.accessKeyId = accessKeyId;
     this.secretAccessKey = secretAccessKey;
     this.sessionToken = sessionToken;
-
     let guessedService, guessedRegion;
     if (!service || !region) {
 [guessedService, guessedRegion] = guessServiceRegion(this.url, this.headers);
     }
-    this.service = service || guessedService;
-    this.region = region || guessedRegion;
-
+    this.service = service || guessedService || '';
+    this.region = region || guessedRegion || 'us-east-1';
     this.cache = cache || new Map();
     this.datetime = datetime || new Date().toISOString().replace(/[:-]|\.\d{3}/g, '');
     this.signQuery = signQuery;
     this.appendSessionToken = appendSessionToken || this.service === 'iotdevicegateway';
-
-    this.headers.delete('Host'); // Can't be set in insecure env anyway
-
+    this.headers.delete('Host');
     const params = this.signQuery ? this.url.searchParams : this.headers;
     if (this.service === 's3' && !this.headers.has('X-Amz-Content-Sha256')) {
       this.headers.set('X-Amz-Content-Sha256', 'UNSIGNED-PAYLOAD');
     }
-
     params.set('X-Amz-Date', this.datetime);
     if (this.sessionToken && !this.appendSessionToken) {
       params.set('X-Amz-Security-Token', this.sessionToken);
     }
-
-    // headers are always lowercase in keys()
     this.signableHeaders = ['host', ...this.headers.keys()]
       .filter(header => allHeaders || !UNSIGNABLE_HEADERS.includes(header))
       .sort();
-
     this.signedHeaders = this.signableHeaders.join(';');
-
-    // headers are always trimmed:
-    // https://fetch.spec.whatwg.org/#concept-header-value-normalize
     this.canonicalHeaders = this.signableHeaders
-      .map(header => header + ':' + (header === 'host' ? this.url.host : this.headers.get(header).replace(/\s+/g, ' ')))
+      .map(header => header + ':' + (header === 'host' ? this.url.host : (this.headers.get(header) || '').replace(/\s+/g, ' ')))
       .join('\n');
-
     this.credentialString = [this.datetime.slice(0, 8), this.region, this.service, 'aws4_request'].join('/');
-
     if (this.signQuery) {
       if (this.service === 's3' && !params.has('X-Amz-Expires')) {
-        params.set('X-Amz-Expires', 86400); // 24 hours
+        params.set('X-Amz-Expires', '86400');
       }
       params.set('X-Amz-Algorithm', 'AWS4-HMAC-SHA256');
       params.set('X-Amz-Credential', this.accessKeyId + '/' + this.credentialString);
       params.set('X-Amz-SignedHeaders', this.signedHeaders);
     }
-
     if (this.service === 's3') {
       try {
         this.encodedPath = decodeURIComponent(this.url.pathname).replace(/\+/g, ' ');
@@ -145,13 +127,12 @@ class AwsV4Signer {
       this.encodedPath = encodeURIComponent(this.encodedPath).replace(/%2F/g, '/');
     }
     this.encodedPath = encodeRfc3986(this.encodedPath);
-
     const seenKeys = new Set();
     this.encodedSearch = [...this.url.searchParams]
       .filter(([k]) => {
-        if (!k) return false // no empty keys
+        if (!k) return false
         if (this.service === 's3') {
-          if (seenKeys.has(k)) return false // first val only for S3
+          if (seenKeys.has(k)) return false
           seenKeys.add(k);
         }
         return true
@@ -161,7 +142,6 @@ class AwsV4Signer {
       .map(pair => pair.join('='))
       .join('&');
   }
-
   async sign() {
     if (this.signQuery) {
       this.url.searchParams.set('X-Amz-Signature', await this.signature());
@@ -171,7 +151,6 @@ class AwsV4Signer {
     } else {
       this.headers.set('Authorization', await this.authHeader());
     }
-
     return {
       method: this.method,
       url: this.url,
@@ -179,7 +158,6 @@ class AwsV4Signer {
       body: this.body,
     }
   }
-
   async authHeader() {
     return [
       'AWS4-HMAC-SHA256 Credential=' + this.accessKeyId + '/' + this.credentialString,
@@ -187,7 +165,6 @@ class AwsV4Signer {
       'Signature=' + (await this.signature()),
     ].join(', ')
   }
-
   async signature() {
     const date = this.datetime.slice(0, 8);
     const cacheKey = [this.secretAccessKey, date, this.region, this.service].join();
@@ -199,18 +176,16 @@ class AwsV4Signer {
       kCredentials = await hmac(kService, 'aws4_request');
       this.cache.set(cacheKey, kCredentials);
     }
-    return hmac(kCredentials, await this.stringToSign(), 'hex')
+    return buf2hex(await hmac(kCredentials, await this.stringToSign()))
   }
-
   async stringToSign() {
     return [
       'AWS4-HMAC-SHA256',
       this.datetime,
       this.credentialString,
-      await hash(await this.canonicalString(), 'hex'),
+      buf2hex(await hash(await this.canonicalString())),
     ].join('\n')
   }
-
   async canonicalString() {
     return [
       this.method.toUpperCase(),
@@ -221,17 +196,18 @@ class AwsV4Signer {
       await this.hexBodyHash(),
     ].join('\n')
   }
-
   async hexBodyHash() {
-    if (this.headers.has('X-Amz-Content-Sha256')) {
-      return this.headers.get('X-Amz-Content-Sha256')
-    } else {
-      return hash(this.body || '', 'hex')
+    let hashHeader = this.headers.get('X-Amz-Content-Sha256');
+    if (hashHeader == null) {
+      if (this.body && typeof this.body !== 'string' && !('byteLength' in this.body)) {
+        throw new Error('body must be a string, ArrayBuffer or ArrayBufferView, unless you include the X-Amz-Content-Sha256 header')
+      }
+      hashHeader = buf2hex(await hash(this.body || ''));
     }
+    return hashHeader
   }
 }
-
-async function hmac(key, string, encoding) {
+async function hmac(key, string) {
   const cryptoKey = await crypto.subtle.importKey(
     'raw',
     typeof key === 'string' ? encoder.encode(key) : key,
@@ -239,28 +215,21 @@ async function hmac(key, string, encoding) {
     false,
     ['sign'],
   );
-  const signed = await crypto.subtle.sign('HMAC', cryptoKey, encoder.encode(string));
-  return encoding === 'hex' ? buf2hex(signed) : signed
+  return crypto.subtle.sign('HMAC', cryptoKey, encoder.encode(string))
 }
-
-async function hash(content, encoding) {
-  const digest = await crypto.subtle.digest('SHA-256', typeof content === 'string' ? encoder.encode(content) : content);
-  return encoding === 'hex' ? buf2hex(digest) : digest
+async function hash(content) {
+  return crypto.subtle.digest('SHA-256', typeof content === 'string' ? encoder.encode(content) : content)
 }
-
 function buf2hex(buffer) {
   return Array.prototype.map.call(new Uint8Array(buffer), x => ('0' + x.toString(16)).slice(-2)).join('')
 }
-
 function encodeRfc3986(urlEncodedStr) {
   return urlEncodedStr.replace(/[!'()*]/g, c => '%' + c.charCodeAt(0).toString(16).toUpperCase())
 }
-
 function guessServiceRegion(url, headers) {
   const { hostname, pathname } = url;
   const match = hostname.replace('dualstack.', '').match(/([^.]+)\.(?:([^.]*)\.)?amazonaws\.com(?:\.cn)?$/);
   let [service, region] = (match || ['', '']).slice(1, 3);
-
   if (region === 'us-gov') {
     region = 'us-gov-west-1';
   } else if (region === 's3' || region === 's3-accelerate') {
@@ -289,8 +258,7 @@ function guessServiceRegion(url, headers) {
   } else if (region && /-\d$/.test(service) && !/-\d$/.test(region)) {
 [service, region] = [region, service];
   }
-
-  return [HOST_SERVICES[service] || service, region || 'us-east-1']
+  return [HOST_SERVICES[service] || service, region]
 }
 
 export { AwsClient, AwsV4Signer };

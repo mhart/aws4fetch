@@ -7,4 +7,5 @@ module.exports = {
   env: {
     browser: true,
   },
+  ignorePatterns: ['dist', 'example/worker.js'],
 }

@@ -20,7 +20,7 @@ async function awsTest({ test, method, url, headers, body, canonicalString, stri
     }
   })
 
-  const securityToken = reqHeaders.get('X-Amz-Security-Token')
+  const sessionToken = reqHeaders.get('X-Amz-Security-Token')
 
   const signer = new AwsV4Signer({
     method,
@@ -29,7 +29,7 @@ async function awsTest({ test, method, url, headers, body, canonicalString, stri
     body,
     accessKeyId,
     secretAccessKey,
-    securityToken,
+    sessionToken,
     service,
     datetime,
     allHeaders: true,
@@ -45,7 +45,7 @@ async function awsTest({ test, method, url, headers, body, canonicalString, stri
   const reqAuthHeader = await signer.authHeader()
   console.assert(reqAuthHeader === authHeader, `${test}: Expected authHeader ${authHeader}, got ${reqAuthHeader}`)
 
-  const client = new AwsClient({ accessKeyId, secretAccessKey, securityToken, service })
+  const client = new AwsClient({ accessKeyId, secretAccessKey, sessionToken, service })
 
   const inputReq = new Request(url, { method, headers: reqHeaders, body })
   const req1 = await client.sign(inputReq, { aws: { datetime, allHeaders: true, singleEncode: true } })
