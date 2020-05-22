@@ -70,7 +70,7 @@ npm run build
 Or run the `rollup` command manually:
 
 ```
-rollup index.js --format es -o worker.js
+rollup index.js --format es -p @rollup/plugin-node-resolve -o worker.js
 ```
 
 You could also use [`webpack`](https://webpack.js.org/), [`parcel`](https://parceljs.org/) or any other JS bundler.
