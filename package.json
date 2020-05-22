@@ -5,7 +5,7 @@
   "main": "dist/aws4fetch.cjs.js",
   "module": "dist/aws4fetch.esm.js",
   "browser": "dist/aws4fetch.umd.js",
-  "types": "dist/aws4fetch.d.ts",
+  "types": "dist/main.d.ts",
   "author": "Michael Hart <michael.hart.au@gmail.com>",
   "license": "MIT",
   "devDependencies": {
@@ -21,7 +21,7 @@
     "typescript": "^3.9.3"
   },
   "scripts": {
-    "declaration": "tsc -p declaration.tsconfig.json --outFile dist/aws4fetch.d.ts",
+    "declaration": "tsc -p declaration.tsconfig.json",
     "build": "npm run declaration && rollup -c",
     "prepare": "npm run build",
     "lint": "eslint .",
