@@ -1,4 +1,4 @@
-declare module "main" {
+declare module "aws4fetch" {
     export class AwsClient {
         constructor({ accessKeyId, secretAccessKey, sessionToken, service, region, cache, retries, initRetryMs }: {
             accessKeyId: string;
