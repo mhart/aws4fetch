@@ -1,6 +1,6 @@
 {
   "name": "aws4fetch",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "",
   "main": "dist/aws4fetch.cjs.js",
   "module": "dist/aws4fetch.esm.js",
