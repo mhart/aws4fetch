@@ -1,4 +1,4 @@
-import { AwsClient } from '../src/main'
+import { AwsClient } from 'aws4fetch'
 
 // Assume AWS_* vars have added to your environment
 // https://developers.cloudflare.com/workers/reference/apis/environment-variables/#secrets
