@@ -80,7 +80,7 @@
       if (secretAccessKey == null) throw new TypeError('secretAccessKey is a required option')
       this.method = method || (body ? 'POST' : 'GET');
       this.url = new URL(url);
-      this.headers = new Headers(headers);
+      this.headers = new Headers(headers || {});
       this.body = body;
       this.accessKeyId = accessKeyId;
       this.secretAccessKey = secretAccessKey;
