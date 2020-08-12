@@ -7,6 +7,14 @@
 
 const encoder = new TextEncoder()
 
+const getCrypto = () => {
+  // cloudflare env
+  if (typeof crypto !== "undefined") return crypto
+  // browser env
+  if (typeof window !== "undefined" && window.crypto) return window.crypto
+  throw new Error("window.crypto is not defined, browser is not supported!")
+}
+
 /** @type {Object.<string, string>} */
 const HOST_SERVICES = {
   appstream2: 'appstream',
@@ -332,14 +340,14 @@ export class AwsV4Signer {
  */
 async function hmac(key, string) {
   // @ts-ignore // https://github.com/microsoft/TypeScript/issues/38715
-  const cryptoKey = await crypto.subtle.importKey(
+  const cryptoKey = await getCrypto().subtle.importKey(
     'raw',
     typeof key === 'string' ? encoder.encode(key) : key,
     { name: 'HMAC', hash: { name: 'SHA-256' } },
     false,
     ['sign'],
   )
-  return crypto.subtle.sign('HMAC', cryptoKey, encoder.encode(string))
+  return getCrypto().subtle.sign('HMAC', cryptoKey, encoder.encode(string))
 }
 
 /**
@@ -348,7 +356,7 @@ async function hmac(key, string) {
  */
 async function hash(content) {
   // @ts-ignore // https://github.com/microsoft/TypeScript/issues/38715
-  return crypto.subtle.digest('SHA-256', typeof content === 'string' ? encoder.encode(content) : content)
+  return getCrypto().subtle.digest('SHA-256', typeof content === 'string' ? encoder.encode(content) : content)
 }
 
 /**
