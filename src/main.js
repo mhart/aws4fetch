@@ -202,7 +202,7 @@ export class AwsV4Signer {
     if (this.service === 's3') {
       try {
         /** @type {string} */
-        this.encodedPath = decodeURIComponent(this.url.pathname).replace(/\+/g, ' ')
+        this.encodedPath = decodeURIComponent(this.url.pathname.replace(/\+/g, ' '))
       } catch (e) {
         this.encodedPath = this.url.pathname
       }

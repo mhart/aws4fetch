@@ -122,7 +122,7 @@
       }
       if (this.service === 's3') {
         try {
-          this.encodedPath = decodeURIComponent(this.url.pathname).replace(/\+/g, ' ');
+          this.encodedPath = decodeURIComponent(this.url.pathname.replace(/\+/g, ' '));
         } catch (e) {
           this.encodedPath = this.url.pathname;
         }
