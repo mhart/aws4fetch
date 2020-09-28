@@ -209,7 +209,7 @@ export class AwsV4Signer {
     } else {
       this.encodedPath = this.url.pathname.replace(/\/+/g, '/')
     }
-    if (!singleEncode) {
+    if (!singleEncode && !(typeof(singleEncode) == 'undefined')) {
       this.encodedPath = encodeURIComponent(this.encodedPath).replace(/%2F/g, '/')
     }
     this.encodedPath = encodeRfc3986(this.encodedPath)
