@@ -24,6 +24,7 @@ const UNSIGNABLE_HEADERS = [
   'expect',
   'x-amzn-trace-id',
   'range',
+  'connection',
 ];
 class AwsClient {
   constructor({ accessKeyId, secretAccessKey, sessionToken, service, region, cache, retries, initRetryMs }) {

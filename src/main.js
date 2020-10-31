@@ -31,6 +31,7 @@ const UNSIGNABLE_HEADERS = [
   'expect',
   'x-amzn-trace-id',
   'range',
+  'connection',
 ]
 
 export class AwsClient {
