@@ -1,6 +1,6 @@
 {
   "name": "aws4fetch",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "description": "A compact AWS client for modern JS environments",
   "author": "Michael Hart <michael.hart.au@gmail.com> (https://github.com/mhart)",
   "license": "MIT",
