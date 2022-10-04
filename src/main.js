@@ -2,7 +2,7 @@
 
 /**
  * @license MIT <https://opensource.org/licenses/MIT>
- * @copyright Michael Hart 2018
+ * @copyright Michael Hart 2022
  */
 
 const encoder = new TextEncoder()
@@ -22,7 +22,7 @@ const HOST_SERVICES = {
 }
 
 // https://github.com/aws/aws-sdk-js/blob/cc29728c1c4178969ebabe3bbe6b6f3159436394/lib/signers/v4.js#L190-L198
-const UNSIGNABLE_HEADERS = [
+const UNSIGNABLE_HEADERS = new Set([
   'authorization',
   'content-type',
   'content-length',
@@ -32,7 +32,7 @@ const UNSIGNABLE_HEADERS = [
   'x-amzn-trace-id',
   'range',
   'connection',
-]
+])
 
 export class AwsClient {
   /**
@@ -174,10 +174,11 @@ export class AwsV4Signer {
 
     this.headers.delete('Host') // Can't be set in insecure env anyway
 
-    const params = this.signQuery ? this.url.searchParams : this.headers
-    if (this.service === 's3' && !this.headers.has('X-Amz-Content-Sha256')) {
+    if (this.service === 's3' && !this.signQuery && !this.headers.has('X-Amz-Content-Sha256')) {
       this.headers.set('X-Amz-Content-Sha256', 'UNSIGNED-PAYLOAD')
     }
+
+    const params = this.signQuery ? this.url.searchParams : this.headers
 
     params.set('X-Amz-Date', this.datetime)
     if (this.sessionToken && !this.appendSessionToken) {
@@ -186,7 +187,7 @@ export class AwsV4Signer {
 
     // headers are always lowercase in keys()
     this.signableHeaders = ['host', ...this.headers.keys()]
-      .filter(header => allHeaders || !UNSIGNABLE_HEADERS.includes(header))
+      .filter(header => allHeaders || !UNSIGNABLE_HEADERS.has(header))
       .sort()
 
     this.signedHeaders = this.signableHeaders.join(';')
@@ -323,7 +324,7 @@ export class AwsV4Signer {
    * @returns {Promise<string>}
    */
   async hexBodyHash() {
-    let hashHeader = this.headers.get('X-Amz-Content-Sha256')
+    let hashHeader = this.headers.get('X-Amz-Content-Sha256') || (this.service === 's3' && this.signQuery ? 'UNSIGNED-PAYLOAD' : null)
     if (hashHeader == null) {
       if (this.body && typeof this.body !== 'string' && !('byteLength' in this.body)) {
         throw new Error('body must be a string, ArrayBuffer or ArrayBufferView, unless you include the X-Amz-Content-Sha256 header')

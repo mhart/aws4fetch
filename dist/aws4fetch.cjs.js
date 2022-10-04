@@ -4,7 +4,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 /**
  * @license MIT <https://opensource.org/licenses/MIT>
- * @copyright Michael Hart 2018
+ * @copyright Michael Hart 2022
  */
 const encoder = new TextEncoder();
 const HOST_SERVICES = {
@@ -19,7 +19,7 @@ const HOST_SERVICES = {
   'mturk-requester-sandbox': 'mturk-requester',
   'personalize-runtime': 'personalize',
 };
-const UNSIGNABLE_HEADERS = [
+const UNSIGNABLE_HEADERS = new Set([
   'authorization',
   'content-type',
   'content-length',
@@ -29,7 +29,7 @@ const UNSIGNABLE_HEADERS = [
   'x-amzn-trace-id',
   'range',
   'connection',
-];
+]);
 class AwsClient {
   constructor({ accessKeyId, secretAccessKey, sessionToken, service, region, cache, retries, initRetryMs }) {
     if (accessKeyId == null) throw new TypeError('accessKeyId is a required option')
@@ -102,16 +102,16 @@ class AwsV4Signer {
     this.signQuery = signQuery;
     this.appendSessionToken = appendSessionToken || this.service === 'iotdevicegateway';
     this.headers.delete('Host');
-    const params = this.signQuery ? this.url.searchParams : this.headers;
-    if (this.service === 's3' && !this.headers.has('X-Amz-Content-Sha256')) {
+    if (this.service === 's3' && !this.signQuery && !this.headers.has('X-Amz-Content-Sha256')) {
       this.headers.set('X-Amz-Content-Sha256', 'UNSIGNED-PAYLOAD');
     }
+    const params = this.signQuery ? this.url.searchParams : this.headers;
     params.set('X-Amz-Date', this.datetime);
     if (this.sessionToken && !this.appendSessionToken) {
       params.set('X-Amz-Security-Token', this.sessionToken);
     }
     this.signableHeaders = ['host', ...this.headers.keys()]
-      .filter(header => allHeaders || !UNSIGNABLE_HEADERS.includes(header))
+      .filter(header => allHeaders || !UNSIGNABLE_HEADERS.has(header))
       .sort();
     this.signedHeaders = this.signableHeaders.join(';');
     this.canonicalHeaders = this.signableHeaders
@@ -209,7 +209,7 @@ class AwsV4Signer {
     ].join('\n')
   }
   async hexBodyHash() {
-    let hashHeader = this.headers.get('X-Amz-Content-Sha256');
+    let hashHeader = this.headers.get('X-Amz-Content-Sha256') || (this.service === 's3' && this.signQuery ? 'UNSIGNED-PAYLOAD' : null);
     if (hashHeader == null) {
       if (this.body && typeof this.body !== 'string' && !('byteLength' in this.body)) {
         throw new Error('body must be a string, ArrayBuffer or ArrayBufferView, unless you include the X-Amz-Content-Sha256 header')

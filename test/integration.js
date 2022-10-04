@@ -60,10 +60,21 @@ https.globalAgent.maxSockets = 10
     signQuery: true,
     method: 'POST',
     body: '',
+  }, {
+    url: 'https://test.s3.amazonaws.com//`@$^&*()-_+[]{}\\|;:.,<>€ü%41=b~ and c * \' //(whatever)!?€ü`@$^&*()-_+[]{}\\|;:.,<>=`@$^&*()-_+[]{}\\|;:.,<>%41€üab~ and c * \' (whatever)!',
+    method: 'POST',
+    body: '',
+  }, {
+    url: 'https://test.s3.amazonaws.com//`@$^&*()-_+[]{}\\|;:.,<>€ü%41=b~ and c * \' //(whatever)!?€ü`@$^&*()-_+[]{}\\|;:.,<>=`@$^&*()-_+[]{}\\|;:.,<>%41€üab~ and c * \' (whatever)!',
+    signQuery: true,
+    method: 'POST',
+    body: '',
   }]
 
   paths.forEach(p => tests.push({ url: `https://s3.amazonaws.com/test${p}` }))
   paths.forEach(p => tests.push({ url: `https://s3.amazonaws.com/test${p}`, signQuery: true }))
+  paths.forEach(p => tests.push({ url: `https://test.s3.amazonaws.com/test${p}` }))
+  paths.forEach(p => tests.push({ url: `https://test.s3.amazonaws.com/test${p}`, signQuery: true }))
   paths.forEach(p => tests.push({ url: `https://runtime.sagemaker.us-east-1.amazonaws.com/test${p}` }))
   paths.forEach(p => tests.push({ url: `https://runtime.sagemaker.us-east-1.amazonaws.com/test${p}`, signQuery: true }))
 
@@ -275,11 +286,12 @@ https.globalAgent.maxSockets = 10
           canonicalString: signed[i].canonicalString,
           body: r.body.replace(/&amp;/g, '&'),
         }
-      : null).filter(Boolean).forEach(({ path, canonicalString, body }) => {
-      console.log(path)
-      console.log(canonicalString)
-      console.log(body)
-    })
+      : null)
+      .filter(Boolean).forEach(({ path, canonicalString, body }) => {
+        console.log(path)
+        console.log(canonicalString)
+        console.log(body)
+      })
   } catch (e) {
     console.error(e)
   }
@@ -294,11 +306,12 @@ https.globalAgent.maxSockets = 10
           canonicalString: signed[i].canonicalString,
           body: r.body.replace(/&amp;/g, '&'),
         }
-      : null).filter(Boolean).forEach(({ path, canonicalString, body }) => {
-      console.log(path)
-      console.log(canonicalString)
-      console.log(body)
-    })
+      : null)
+      .filter(Boolean).forEach(({ path, canonicalString, body }) => {
+        console.log(path)
+        console.log(canonicalString)
+        console.log(body)
+      })
   } catch (e) {
     console.error(e)
   }
