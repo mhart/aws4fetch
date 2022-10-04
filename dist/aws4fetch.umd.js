@@ -242,6 +242,13 @@
   }
   function guessServiceRegion(url, headers) {
     const { hostname, pathname } = url;
+    if (hostname.endsWith('.r2.cloudflarestorage.com')) {
+      return ['s3', 'auto']
+    }
+    if (hostname.endsWith('.backblazeb2.com')) {
+      const match = hostname.match(/^(?:[^.]+\.)?s3\.([^.]+)\.backblazeb2\.com$/);
+      return match != null ? ['s3', match[1]] : ['', '']
+    }
     const match = hostname.replace('dualstack.', '').match(/([^.]+)\.(?:([^.]*)\.)?amazonaws\.com(?:\.cn)?$/);
     let [service, region] = (match || ['', '']).slice(1, 3);
     if (region === 'us-gov') {

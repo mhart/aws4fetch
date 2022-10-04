@@ -73,6 +73,10 @@ sts.amazonaws.com,sts,us-east-1
 us-west-2.queue.amazonaws.com,sqs,us-west-2
 waf-regional.us-west-2.amazonaws.com,waf-regional,us-west-2
 waf.amazonaws.com,waf,us-east-1
+aa-custom-bucket.s3.us-west-001.backblazeb2.com,s3,us-west-001
+s3.us-west-001.backblazeb2.com,s3,us-west-001
+12345678.r2.cloudflarestorage.com,s3,auto
+aa-custom-bucket.12345678.r2.cloudflarestorage.com,s3,auto
   `
   return csv.trim().split('\n').map(line => {
     const [url, service, region] = line.split(',')
