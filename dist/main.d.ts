@@ -69,7 +69,7 @@ export class AwsV4Signer {
     method: string;
     url: URL;
     headers: Headers;
-    body: string | ArrayBuffer | ArrayBufferView | Blob | FormData | URLSearchParams | ReadableStream<Uint8Array> | null | undefined;
+    body: BodyInit | null | undefined;
     accessKeyId: string;
     secretAccessKey: string;
     sessionToken: string | undefined;

@@ -269,15 +269,13 @@ https.globalAgent.maxSockets = 10
     const signed = await getSignedTests(tests, browser)
     const responses = await Promise.all(signed.map(request))
 
-    responses.map((r, i) => {
-      if (/InvalidSignatureException|SignatureDoesNotMatch/.test(r.body)) {
-        return {
+    responses.map((r, i) => /InvalidSignatureException|SignatureDoesNotMatch/.test(r.body)
+      ? {
           path: signed[i].path,
           canonicalString: signed[i].canonicalString,
           body: r.body.replace(/&amp;/g, '&'),
         }
-      }
-    }).filter(Boolean).forEach(({ path, canonicalString, body }) => {
+      : null).filter(Boolean).forEach(({ path, canonicalString, body }) => {
       console.log(path)
       console.log(canonicalString)
       console.log(body)
@@ -290,15 +288,13 @@ https.globalAgent.maxSockets = 10
     const signed = await getSignedTests(okTests, browser)
     const responses = await Promise.all(signed.map(request))
 
-    responses.map((r, i) => {
-      if (r.statusCode !== 200) {
-        return {
+    responses.map((r, i) => r.statusCode !== 200
+      ? {
           path: signed[i].path,
           canonicalString: signed[i].canonicalString,
           body: r.body.replace(/&amp;/g, '&'),
         }
-      }
-    }).filter(Boolean).forEach(({ path, canonicalString, body }) => {
+      : null).filter(Boolean).forEach(({ path, canonicalString, body }) => {
       console.log(path)
       console.log(canonicalString)
       console.log(body)
@@ -315,7 +311,7 @@ https.globalAgent.maxSockets = 10
 async function getSignedTests(tests, browser) {
   const rollupFile = path.join(os.tmpdir(), 'aws4fetch.integration.test.js')
   fs.writeFileSync(rollupFile, `
-    import { AwsV4Signer } from '${__dirname}/../src/main'
+    import { AwsV4Signer } from '${path.join(__dirname, '..', 'src', 'main')}'
     Promise.all(${JSON.stringify(tests)}.map(async(options) => {
       let signer = new AwsV4Signer(options)
       let canonicalString = await signer.canonicalString()
