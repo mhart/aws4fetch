@@ -55,7 +55,14 @@ class AwsClient {
     const signer = new AwsV4Signer(Object.assign({ url: input }, init, this, init && init.aws));
     const signed = Object.assign({}, init, await signer.sign());
     delete signed.aws;
-    return new Request(signed.url.toString(), signed)
+    try {
+      return new Request(signed.url.toString(), signed)
+    } catch (e) {
+      if (e instanceof TypeError) {
+        return new Request(signed.url.toString(), Object.assign({ duplex: 'half' }, signed))
+      }
+      throw e
+    }
   }
   async fetch(input, init) {
     for (let i = 0; i <= this.retries; i++) {
