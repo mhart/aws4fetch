@@ -10,7 +10,7 @@
   "browser": "dist/aws4fetch.umd.js",
   "exports": {
     ".": {
-      "import": "./dist/aws4fetch.esm.js",
+      "import": "./dist/aws4fetch.esm.mjs",
       "worker": "./dist/aws4fetch.esm.js",
       "browser": "./dist/aws4fetch.umd.js",
       "require": "./dist/aws4fetch.cjs.js",
@@ -25,8 +25,10 @@
     "declaration": "tsc -p declaration.tsconfig.json",
     "build": "npm run declaration && rollup -c",
     "prepare": "npm run build",
-    "lint": "eslint .",
+    "lint": "eslint --ext .js,.cjs,.mjs .",
+    "format": "eslint --ext .js,.cjs,.mjs --fix .",
     "test": "node test/test.js",
+    "test-node": "node test/node-es.mjs && node test/node-commonjs.js",
     "integration": "node test/integration.js"
   },
   "devDependencies": {
