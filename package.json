@@ -23,7 +23,7 @@
   ],
   "scripts": {
     "declaration": "tsc -p declaration.tsconfig.json",
-    "build": "npm run declaration && rollup -c",
+    "build": "npm run declaration && npx rollup -c",
     "prepare": "npm run build",
     "lint": "eslint --ext .js,.cjs,.mjs .",
     "format": "eslint --ext .js,.cjs,.mjs --fix .",

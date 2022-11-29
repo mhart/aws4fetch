@@ -1,5 +1,5 @@
 export class AwsClient {
-    constructor({ accessKeyId, secretAccessKey, sessionToken, service, region, cache, retries, initRetryMs }: {
+    constructor({ accessKeyId, secretAccessKey, sessionToken, service, region, cache, retries, initRetryMs, api }: {
         accessKeyId: string;
         secretAccessKey: string;
         sessionToken?: string;
@@ -8,6 +8,7 @@ export class AwsClient {
         cache?: Map<string, ArrayBuffer>;
         retries?: number;
         initRetryMs?: number;
+        api?: typeof DEFAULT_API;
     });
     accessKeyId: string;
     secretAccessKey: string;
@@ -17,6 +18,23 @@ export class AwsClient {
     cache: Map<any, any>;
     retries: number;
     initRetryMs: number;
+    api: {
+        fetch: typeof fetch;
+        Request: {
+            new (input: RequestInfo | URL, init?: RequestInit | undefined): Request;
+            prototype: Request;
+        };
+        Headers: {
+            new (init?: HeadersInit | undefined): Headers;
+            prototype: Headers;
+        };
+        crypto: Crypto;
+        TextEncoder: {
+            new (): TextEncoder;
+            prototype: TextEncoder;
+        };
+    };
+    textEncoder: TextEncoder;
     sign(input: RequestInfo, init?: (RequestInit & {
         aws?: {
             accessKeyId?: string | undefined;
@@ -49,7 +67,7 @@ export class AwsClient {
     }) | null | undefined): Promise<Response>;
 }
 export class AwsV4Signer {
-    constructor({ method, url, headers, body, accessKeyId, secretAccessKey, sessionToken, service, region, cache, datetime, signQuery, appendSessionToken, allHeaders, singleEncode }: {
+    constructor({ method, url, headers, body, accessKeyId, secretAccessKey, sessionToken, service, region, cache, datetime, signQuery, appendSessionToken, allHeaders, singleEncode, api, textEncoder }: {
         method?: string;
         url: string;
         headers?: HeadersInit;
@@ -65,7 +83,17 @@ export class AwsV4Signer {
         appendSessionToken?: boolean;
         allHeaders?: boolean;
         singleEncode?: boolean;
+        textEncoder?: TextEncoder;
+        api?: {
+            Headers: typeof Headers;
+            crypto: Crypto;
+        };
     });
+    api: {
+        Headers: typeof Headers;
+        crypto: Crypto;
+    };
+    textEncoder: TextEncoder;
     method: string;
     url: URL;
     headers: Headers;
@@ -97,3 +125,25 @@ export class AwsV4Signer {
     canonicalString(): Promise<string>;
     hexBodyHash(): Promise<string>;
 }
+declare namespace DEFAULT_API {
+    const fetch_1: typeof globalThis.fetch;
+    export { fetch_1 as fetch };
+    const Request_1: {
+        new (input: RequestInfo | URL, init?: RequestInit | undefined): Request;
+        prototype: Request;
+    };
+    export { Request_1 as Request };
+    const Headers_1: {
+        new (init?: HeadersInit | undefined): Headers;
+        prototype: Headers;
+    };
+    export { Headers_1 as Headers };
+    const crypto_1: Crypto;
+    export { crypto_1 as crypto };
+    const TextEncoder_1: {
+        new (): TextEncoder;
+        prototype: TextEncoder;
+    };
+    export { TextEncoder_1 as TextEncoder };
+}
+export {};
