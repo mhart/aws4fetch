@@ -8,7 +8,6 @@
    * @license MIT <https://opensource.org/licenses/MIT>
    * @copyright Michael Hart 2022
    */
-  const encoder = new TextEncoder();
   const HOST_SERVICES = {
     appstream2: 'appstream',
     cloudhsmv2: 'cloudhsm',
@@ -20,6 +19,13 @@
     'git-codecommit': 'codecommit',
     'mturk-requester-sandbox': 'mturk-requester',
     'personalize-runtime': 'personalize',
+  };
+  const DEFAULT_API = {
+    fetch: globalThis.fetch,
+    Request: globalThis.Request,
+    Headers: globalThis.Headers,
+    crypto: globalThis.crypto,
+    TextEncoder: globalThis.TextEncoder,
   };
   const UNSIGNABLE_HEADERS = new Set([
     'authorization',
@@ -33,7 +39,7 @@
     'connection',
   ]);
   class AwsClient {
-    constructor({ accessKeyId, secretAccessKey, sessionToken, service, region, cache, retries, initRetryMs }) {
+    constructor({ accessKeyId, secretAccessKey, sessionToken, service, region, cache, retries, initRetryMs, api }) {
       if (accessKeyId == null) throw new TypeError('accessKeyId is a required option')
       if (secretAccessKey == null) throw new TypeError('secretAccessKey is a required option')
       this.accessKeyId = accessKeyId;
@@ -44,9 +50,11 @@
       this.cache = cache || new Map();
       this.retries = retries != null ? retries : 10;
       this.initRetryMs = initRetryMs || 50;
+      this.api = api || DEFAULT_API;
+      this.textEncoder = new this.api.TextEncoder();
     }
     async sign(input, init) {
-      if (input instanceof Request) {
+      if (input instanceof this.api.Request) {
         const { method, url, headers, body } = input;
         init = Object.assign({ method, url, headers }, init);
         if (init.body == null && headers.has('Content-Type')) {
@@ -54,21 +62,21 @@
         }
         input = url;
       }
-      const signer = new AwsV4Signer(Object.assign({ url: input }, init, this, init && init.aws));
+      const signer = new AwsV4Signer(Object.assign({ url: input, api: this.api, textEncoder: this.textEncoder }, init, this, init && init.aws));
       const signed = Object.assign({}, init, await signer.sign());
       delete signed.aws;
       try {
-        return new Request(signed.url.toString(), signed)
+        return new this.api.Request(signed.url.toString(), signed)
       } catch (e) {
         if (e instanceof TypeError) {
-          return new Request(signed.url.toString(), Object.assign({ duplex: 'half' }, signed))
+          return new this.api.Request(signed.url.toString(), Object.assign({ duplex: 'half' }, signed))
         }
         throw e
       }
     }
     async fetch(input, init) {
       for (let i = 0; i <= this.retries; i++) {
-        const fetched = fetch(await this.sign(input, init));
+        const fetched = this.api.fetch(await this.sign(input, init));
         if (i === this.retries) {
           return fetched
         }
@@ -82,13 +90,15 @@
     }
   }
   class AwsV4Signer {
-    constructor({ method, url, headers, body, accessKeyId, secretAccessKey, sessionToken, service, region, cache, datetime, signQuery, appendSessionToken, allHeaders, singleEncode }) {
+    constructor({ method, url, headers, body, accessKeyId, secretAccessKey, sessionToken, service, region, cache, datetime, signQuery, appendSessionToken, allHeaders, singleEncode, api, textEncoder }) {
       if (url == null) throw new TypeError('url is a required option')
       if (accessKeyId == null) throw new TypeError('accessKeyId is a required option')
       if (secretAccessKey == null) throw new TypeError('secretAccessKey is a required option')
+      this.api = api ?? DEFAULT_API;
+      this.textEncoder = textEncoder || new DEFAULT_API.TextEncoder();
       this.method = method || (body ? 'POST' : 'GET');
       this.url = new URL(url);
-      this.headers = new Headers(headers || {});
+      this.headers = new this.api.Headers(headers || {});
       this.body = body;
       this.accessKeyId = accessKeyId;
       this.secretAccessKey = secretAccessKey;
@@ -184,20 +194,20 @@
       const cacheKey = [this.secretAccessKey, date, this.region, this.service].join();
       let kCredentials = this.cache.get(cacheKey);
       if (!kCredentials) {
-        const kDate = await hmac('AWS4' + this.secretAccessKey, date);
-        const kRegion = await hmac(kDate, this.region);
-        const kService = await hmac(kRegion, this.service);
-        kCredentials = await hmac(kService, 'aws4_request');
+        const kDate = await hmac(this.api.crypto, this.textEncoder, 'AWS4' + this.secretAccessKey, date);
+        const kRegion = await hmac(this.api.crypto, this.textEncoder, kDate, this.region);
+        const kService = await hmac(this.api.crypto, this.textEncoder, kRegion, this.service);
+        kCredentials = await hmac(this.api.crypto, this.textEncoder, kService, 'aws4_request');
         this.cache.set(cacheKey, kCredentials);
       }
-      return buf2hex(await hmac(kCredentials, await this.stringToSign()))
+      return buf2hex(await hmac(this.api.crypto, this.textEncoder, kCredentials, await this.stringToSign()))
     }
     async stringToSign() {
       return [
         'AWS4-HMAC-SHA256',
         this.datetime,
         this.credentialString,
-        buf2hex(await hash(await this.canonicalString())),
+        buf2hex(await hash(this.api.crypto, this.textEncoder, await this.canonicalString())),
       ].join('\n')
     }
     async canonicalString() {
@@ -216,12 +226,12 @@
         if (this.body && typeof this.body !== 'string' && !('byteLength' in this.body)) {
           throw new Error('body must be a string, ArrayBuffer or ArrayBufferView, unless you include the X-Amz-Content-Sha256 header')
         }
-        hashHeader = buf2hex(await hash(this.body || ''));
+        hashHeader = buf2hex(await hash(this.api.crypto, this.textEncoder, this.body || ''));
       }
       return hashHeader
     }
   }
-  async function hmac(key, string) {
+  async function hmac(crypto, encoder, key, string) {
     const cryptoKey = await crypto.subtle.importKey(
       'raw',
       typeof key === 'string' ? encoder.encode(key) : key,
@@ -231,7 +241,7 @@
     );
     return crypto.subtle.sign('HMAC', cryptoKey, encoder.encode(string))
   }
-  async function hash(content) {
+  async function hash(crypto, encoder, content) {
     return crypto.subtle.digest('SHA-256', typeof content === 'string' ? encoder.encode(content) : content)
   }
   function buf2hex(buffer) {

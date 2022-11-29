@@ -5,8 +5,6 @@
  * @copyright Michael Hart 2022
  */
 
-const encoder = new TextEncoder()
-
 /** @type {Object.<string, string>} */
 const HOST_SERVICES = {
   appstream2: 'appstream',
@@ -19,6 +17,14 @@ const HOST_SERVICES = {
   'git-codecommit': 'codecommit',
   'mturk-requester-sandbox': 'mturk-requester',
   'personalize-runtime': 'personalize',
+}
+
+const DEFAULT_API = {
+  fetch: globalThis.fetch,
+  Request: globalThis.Request,
+  Headers: globalThis.Headers,
+  crypto: globalThis.crypto,
+  TextEncoder: globalThis.TextEncoder,
 }
 
 // https://github.com/aws/aws-sdk-js/blob/cc29728c1c4178969ebabe3bbe6b6f3159436394/lib/signers/v4.js#L190-L198
@@ -45,9 +51,10 @@ export class AwsClient {
    *   cache?: Map<string,ArrayBuffer>
    *   retries?: number
    *   initRetryMs?: number
+   *   api?: typeof DEFAULT_API
    * }} options
    */
-  constructor({ accessKeyId, secretAccessKey, sessionToken, service, region, cache, retries, initRetryMs }) {
+  constructor({ accessKeyId, secretAccessKey, sessionToken, service, region, cache, retries, initRetryMs, api }) {
     if (accessKeyId == null) throw new TypeError('accessKeyId is a required option')
     if (secretAccessKey == null) throw new TypeError('secretAccessKey is a required option')
     this.accessKeyId = accessKeyId
@@ -58,6 +65,8 @@ export class AwsClient {
     this.cache = cache || new Map()
     this.retries = retries != null ? retries : 10 // Up to 25.6 secs
     this.initRetryMs = initRetryMs || 50
+    this.api = api || DEFAULT_API
+    this.textEncoder = new this.api.TextEncoder()
   }
 
   /**
@@ -82,7 +91,7 @@ export class AwsClient {
    * @returns {Promise<Request>}
    */
   async sign(input, init) {
-    if (input instanceof Request) {
+    if (input instanceof this.api.Request) {
       const { method, url, headers, body } = input
       init = Object.assign({ method, url, headers }, init)
       if (init.body == null && headers.has('Content-Type')) {
@@ -90,15 +99,15 @@ export class AwsClient {
       }
       input = url
     }
-    const signer = new AwsV4Signer(Object.assign({ url: input }, init, this, init && init.aws))
+    const signer = new AwsV4Signer(Object.assign({ url: input, api: this.api, textEncoder: this.textEncoder }, init, this, init && init.aws))
     const signed = Object.assign({}, init, await signer.sign())
     delete signed.aws
     try {
-      return new Request(signed.url.toString(), signed)
+      return new this.api.Request(signed.url.toString(), signed)
     } catch (e) {
       if (e instanceof TypeError) {
         // https://bugs.chromium.org/p/chromium/issues/detail?id=1360943
-        return new Request(signed.url.toString(), Object.assign({ duplex: 'half' }, signed))
+        return new this.api.Request(signed.url.toString(), Object.assign({ duplex: 'half' }, signed))
       }
       throw e
     }
@@ -111,7 +120,7 @@ export class AwsClient {
    */
   async fetch(input, init) {
     for (let i = 0; i <= this.retries; i++) {
-      const fetched = fetch(await this.sign(input, init))
+      const fetched = this.api.fetch(await this.sign(input, init))
       if (i === this.retries) {
         return fetched // No need to await if we're returning anyway
       }
@@ -143,16 +152,21 @@ export class AwsV4Signer {
    *   appendSessionToken?: boolean
    *   allHeaders?: boolean
    *   singleEncode?: boolean
+   *   textEncoder?: TextEncoder
+   *   api?: { Headers: typeof Headers; crypto: Crypto; }
    * }} options
    */
-  constructor({ method, url, headers, body, accessKeyId, secretAccessKey, sessionToken, service, region, cache, datetime, signQuery, appendSessionToken, allHeaders, singleEncode }) {
+  constructor({ method, url, headers, body, accessKeyId, secretAccessKey, sessionToken, service, region, cache, datetime, signQuery, appendSessionToken, allHeaders, singleEncode, api, textEncoder }) {
     if (url == null) throw new TypeError('url is a required option')
     if (accessKeyId == null) throw new TypeError('accessKeyId is a required option')
     if (secretAccessKey == null) throw new TypeError('secretAccessKey is a required option')
 
+    this.api = api ?? DEFAULT_API
+    this.textEncoder = textEncoder || new DEFAULT_API.TextEncoder()
+
     this.method = method || (body ? 'POST' : 'GET')
     this.url = new URL(url)
-    this.headers = new Headers(headers || {})
+    this.headers = new this.api.Headers(headers || {})
     this.body = body
 
     this.accessKeyId = accessKeyId
@@ -285,13 +299,13 @@ export class AwsV4Signer {
     const cacheKey = [this.secretAccessKey, date, this.region, this.service].join()
     let kCredentials = this.cache.get(cacheKey)
     if (!kCredentials) {
-      const kDate = await hmac('AWS4' + this.secretAccessKey, date)
-      const kRegion = await hmac(kDate, this.region)
-      const kService = await hmac(kRegion, this.service)
-      kCredentials = await hmac(kService, 'aws4_request')
+      const kDate = await hmac(this.api.crypto, this.textEncoder, 'AWS4' + this.secretAccessKey, date)
+      const kRegion = await hmac(this.api.crypto, this.textEncoder, kDate, this.region)
+      const kService = await hmac(this.api.crypto, this.textEncoder, kRegion, this.service)
+      kCredentials = await hmac(this.api.crypto, this.textEncoder, kService, 'aws4_request')
       this.cache.set(cacheKey, kCredentials)
     }
-    return buf2hex(await hmac(kCredentials, await this.stringToSign()))
+    return buf2hex(await hmac(this.api.crypto, this.textEncoder, kCredentials, await this.stringToSign()))
   }
 
   /**
@@ -302,7 +316,7 @@ export class AwsV4Signer {
       'AWS4-HMAC-SHA256',
       this.datetime,
       this.credentialString,
-      buf2hex(await hash(await this.canonicalString())),
+      buf2hex(await hash(this.api.crypto, this.textEncoder, await this.canonicalString())),
     ].join('\n')
   }
 
@@ -329,18 +343,20 @@ export class AwsV4Signer {
       if (this.body && typeof this.body !== 'string' && !('byteLength' in this.body)) {
         throw new Error('body must be a string, ArrayBuffer or ArrayBufferView, unless you include the X-Amz-Content-Sha256 header')
       }
-      hashHeader = buf2hex(await hash(this.body || ''))
+      hashHeader = buf2hex(await hash(this.api.crypto, this.textEncoder, this.body || ''))
     }
     return hashHeader
   }
 }
 
 /**
+ * @param {Crypto} crypto
+ * @param {TextEncoder} encoder
  * @param {string | ArrayBufferView | ArrayBuffer} key
  * @param {string} string
  * @returns {Promise<ArrayBuffer>}
  */
-async function hmac(key, string) {
+async function hmac(crypto, encoder, key, string) {
   // @ts-ignore // https://github.com/microsoft/TypeScript/issues/38715
   const cryptoKey = await crypto.subtle.importKey(
     'raw',
@@ -353,10 +369,12 @@ async function hmac(key, string) {
 }
 
 /**
+ * @param {Crypto} crypto
+ * @param {TextEncoder} encoder
  * @param {string | ArrayBufferView | ArrayBuffer} content
  * @returns {Promise<ArrayBuffer>}
  */
-async function hash(content) {
+async function hash(crypto, encoder, content) {
   // @ts-ignore // https://github.com/microsoft/TypeScript/issues/38715
   return crypto.subtle.digest('SHA-256', typeof content === 'string' ? encoder.encode(content) : content)
 }
