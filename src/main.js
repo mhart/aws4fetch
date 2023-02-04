@@ -385,6 +385,11 @@ function encodeRfc3986(urlEncodedStr) {
 function guessServiceRegion(url, headers) {
   const { hostname, pathname } = url
 
+  if (hostname.endsWith('.on.aws')) {
+    const match = hostname.match(/^[a-z0-9]{32}\.lambda-url\.([^.]+)\.on\.aws$/)
+    return match != null ? ['lambda', match[1]] : ['', '']
+  }
+
   if (hostname.endsWith('.r2.cloudflarestorage.com')) {
     return ['s3', 'auto']
   }
