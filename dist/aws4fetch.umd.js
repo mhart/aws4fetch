@@ -211,7 +211,7 @@
       ].join('\n')
     }
     async hexBodyHash() {
-      let hashHeader = this.headers.get('X-Amz-Content-Sha256') || (this.service === 's3' && this.signQuery ? 'UNSIGNED-PAYLOAD' : null);
+      let hashHeader = this.headers.get('X-Amz-Content-Sha256') || ((this.body && this.body instanceof ReadableStream) || (this.service === 's3' && this.signQuery) ? 'UNSIGNED-PAYLOAD' : null);
       if (hashHeader == null) {
         if (this.body && typeof this.body !== 'string' && !('byteLength' in this.body)) {
           throw new Error('body must be a string, ArrayBuffer or ArrayBufferView, unless you include the X-Amz-Content-Sha256 header')
