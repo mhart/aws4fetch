@@ -1,6 +1,6 @@
 {
   "name": "aws4fetch",
-  "version": "1.0.17",
+  "version": "1.0.18",
   "description": "A compact AWS client for modern JS environments",
   "author": "Michael Hart <michael.hart.au@gmail.com> (https://github.com/mhart)",
   "license": "MIT",
@@ -14,7 +14,8 @@
       "worker": "./dist/aws4fetch.esm.js",
       "browser": "./dist/aws4fetch.umd.js",
       "require": "./dist/aws4fetch.cjs.js",
-      "default": "./dist/aws4fetch.umd.js"
+      "default": "./dist/aws4fetch.umd.js",
+      "types": "./dist/main.d.ts"
     }
   },
   "types": "dist/main.d.ts",
