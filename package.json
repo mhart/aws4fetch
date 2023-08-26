@@ -32,6 +32,7 @@
       }
     }
   },
+  "types": "./dist/main.d.ts",
   "files": [
     "dist"
   ],
