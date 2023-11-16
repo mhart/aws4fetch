@@ -10,6 +10,7 @@
   "browser": "dist/aws4fetch.umd.js",
   "exports": {
     ".": {
+  		"types": "./dist/main.d.ts",
       "import": "./dist/aws4fetch.esm.mjs",
       "worker": "./dist/aws4fetch.esm.js",
       "browser": "./dist/aws4fetch.umd.js",
@@ -17,7 +18,6 @@
       "default": "./dist/aws4fetch.umd.js"
     }
   },
-  "types": "dist/main.d.ts",
   "files": [
     "dist"
   ],
