@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2016",
+    "moduleResolution": "node",
     "rootDir": "src",
     "outDir": "dist",
     "allowJs": true,
@@ -8,7 +9,7 @@
     "strict": true,
     "noImplicitAny": true,
     "strictNullChecks": true,
-    "noUnusedLocals": true
+    "noUnusedLocals": true,
   },
   "include": ["src/**/*"]
 }

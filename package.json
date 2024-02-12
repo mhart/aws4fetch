@@ -4,18 +4,21 @@
   "description": "A compact AWS client for modern JS environments",
   "author": "Michael Hart <michael.hart.au@gmail.com> (https://github.com/mhart)",
   "license": "MIT",
-  "repository": "github:mhart/aws4fetch",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mhart/aws4fetch.git"
+  },
   "main": "dist/aws4fetch.cjs.js",
   "module": "dist/aws4fetch.esm.js",
   "browser": "dist/aws4fetch.umd.js",
   "exports": {
     ".": {
       "import": {
-        "types": "./dist/main.d.ts",
+        "types": "./dist/main.d.mts",
         "default": "./dist/aws4fetch.esm.mjs"
       },
       "worker": {
-        "types": "./dist/main.d.ts",
+        "types": "./dist/main.d.mts",
         "default": "./dist/aws4fetch.esm.js"
       },
       "browser": {
@@ -37,7 +40,7 @@
     "dist"
   ],
   "scripts": {
-    "declaration": "tsc -p declaration.tsconfig.json",
+    "declaration": "tsc -p declaration.tsconfig.json && cp dist/main.d.ts dist/main.d.mts",
     "build": "npm run declaration && rollup -c",
     "prepare": "npm run build",
     "lint": "eslint --ext .js,.cjs,.mjs .",
@@ -47,15 +50,14 @@
     "integration": "node test/integration.js"
   },
   "devDependencies": {
-    "eslint": "^8.24.0",
-    "eslint-config-standard": "^17.0.0",
-    "eslint-plugin-import": "^2.26.0",
+    "eslint": "^8.56.0",
+    "eslint-config-standard": "^17.1.0",
+    "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-promise": "^6.0.1",
-    "eslint-plugin-standard": "^5.0.0",
-    "puppeteer": "^18.0.5",
-    "rollup": "^2.79.1",
+    "eslint-plugin-promise": "^6.1.1",
+    "puppeteer": "^22.0.0",
+    "rollup": "^4.10.0",
     "rollup-plugin-cleanup": "^3.2.1",
-    "typescript": "^4.8.4"
+    "typescript": "^5.3.3"
   }
 }
