@@ -1,5 +1,5 @@
 {
-  "extends": "./tsconfig",
+  "extends": "./jsconfig.json",
   "compilerOptions": {
     "declaration": true,
     "noEmit": false,

@@ -2,13 +2,10 @@
   "name": "aws4fetch-example",
   "version": "1.0.0",
   "dependencies": {
-    "aws4fetch": "^1.0.9"
+    "aws4fetch": "^1.0.18"
   },
   "devDependencies": {
-    "@rollup/plugin-node-resolve": "^8.0.0",
-    "rollup": "^2.10.5"
-  },
-  "scripts": {
-    "build": "rollup index.js --format es -p @rollup/plugin-node-resolve -o worker.js"
+    "@cloudflare/workers-types": "^4.20240419.0",
+    "wrangler": "^3.51.2"
   }
 }

@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "target": "ES2016",
+    "moduleResolution": "Bundler",
+    "rootDir": "src",
+    "outDir": "dist",
+    "checkJs": true,
+    "noEmit": true,
+    "strict": true,
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noUncheckedIndexedAccess": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true
+  },
+  "include": ["src/**/*"]
+}

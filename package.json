@@ -40,24 +40,24 @@
     "dist"
   ],
   "scripts": {
-    "declaration": "tsc -p declaration.tsconfig.json && cp dist/main.d.ts dist/main.d.mts",
+    "declaration": "tsc -p declaration.jsconfig.json && cp dist/main.d.ts dist/main.d.mts",
     "build": "npm run declaration && rollup -c",
     "prepare": "npm run build",
-    "lint": "eslint --ext .js,.cjs,.mjs .",
-    "format": "eslint --ext .js,.cjs,.mjs --fix .",
+    "lint": "eslint --ext .js,.cjs,.mjs --ignore-pattern rollup.config.mjs .",
+    "format": "eslint --ext .js,.cjs,.mjs --ignore-pattern rollup.config.mjs --fix .",
     "test": "node test/test.js",
     "test-node": "node test/node-es.mjs && node test/node-commonjs.js",
     "integration": "node test/integration.js"
   },
   "devDependencies": {
-    "eslint": "^8.56.0",
+    "eslint": "^8.57.0",
     "eslint-config-standard": "^17.1.0",
     "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^6.1.1",
-    "puppeteer": "^22.0.0",
-    "rollup": "^4.10.0",
+    "puppeteer": "^22.6.5",
+    "rollup": "^4.14.3",
     "rollup-plugin-cleanup": "^3.2.1",
-    "typescript": "^5.3.3"
+    "typescript": "^5.4.5"
   }
 }

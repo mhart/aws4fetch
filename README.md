@@ -59,7 +59,7 @@ const aws = new AwsClient({
 
 ### `Promise<Response> aws.fetch(input[, init])`
 
-Has the same signature as the [global fetch function](https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch#Syntax)
+Has the same signature as the [global fetch function](https://developer.mozilla.org/en-US/docs/Web/API/fetch#syntax)
 
 ```js
 import { AwsClient } from 'aws4fetch'

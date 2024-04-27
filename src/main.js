@@ -1,13 +1,11 @@
-// @ts-check
-
 /**
  * @license MIT <https://opensource.org/licenses/MIT>
- * @copyright Michael Hart 2022
+ * @copyright Michael Hart 2024
  */
 
 const encoder = new TextEncoder()
 
-/** @type {Object.<string, string>} */
+/** @type {Record<string, string>} */
 const HOST_SERVICES = {
   appstream2: 'appstream',
   cloudhsmv2: 'cloudhsm',
@@ -42,7 +40,7 @@ export class AwsClient {
    *   sessionToken?: string
    *   service?: string
    *   region?: string
-   *   cache?: Map<string,ArrayBuffer>
+   *   cache?: Map<string, ArrayBuffer>
    *   retries?: number
    *   initRetryMs?: number
    * }} options
@@ -55,6 +53,7 @@ export class AwsClient {
     this.sessionToken = sessionToken
     this.service = service
     this.region = region
+    /** @type {Map<string, ArrayBuffer>} */
     this.cache = cache || new Map()
     this.retries = retries != null ? retries : 10 // Up to 25.6 secs
     this.initRetryMs = initRetryMs || 50
@@ -68,7 +67,7 @@ export class AwsClient {
    *     sessionToken?: string
    *     service?: string
    *     region?: string
-   *     cache?: Map<string,ArrayBuffer>
+   *     cache?: Map<string, ArrayBuffer>
    *     datetime?: string
    *     signQuery?: boolean
    *     appendSessionToken?: boolean
@@ -77,7 +76,7 @@ export class AwsClient {
    *   }
    * }} AwsRequestInit
    *
-   * @param {RequestInfo} input
+   * @param {Request | { toString: () => string }} input
    * @param {?AwsRequestInit} [init]
    * @returns {Promise<Request>}
    */
@@ -90,7 +89,7 @@ export class AwsClient {
       }
       input = url
     }
-    const signer = new AwsV4Signer(Object.assign({ url: input }, init, this, init && init.aws))
+    const signer = new AwsV4Signer(Object.assign({ url: input.toString() }, init, this, init && init.aws))
     const signed = Object.assign({}, init, await signer.sign())
     delete signed.aws
     try {
@@ -105,7 +104,7 @@ export class AwsClient {
   }
 
   /**
-   * @param {RequestInfo} input
+   * @param {Request | { toString: () => string }} input
    * @param {?AwsRequestInit} [init]
    * @returns {Promise<Response>}
    */
@@ -137,7 +136,7 @@ export class AwsV4Signer {
    *   sessionToken?: string
    *   service?: string
    *   region?: string
-   *   cache?: Map<string,ArrayBuffer>
+   *   cache?: Map<string, ArrayBuffer>
    *   datetime?: string
    *   signQuery?: boolean
    *   appendSessionToken?: boolean
@@ -163,10 +162,10 @@ export class AwsV4Signer {
     if (!service || !region) {
       ;[guessedService, guessedRegion] = guessServiceRegion(this.url, this.headers)
     }
-    /** @type {string} */
     this.service = service || guessedService || ''
     this.region = region || guessedRegion || 'us-east-1'
 
+    /** @type {Map<string, ArrayBuffer>} */
     this.cache = cache || new Map()
     this.datetime = datetime || new Date().toISOString().replace(/[:-]|\.\d{3}/g, '')
     this.signQuery = signQuery
@@ -211,7 +210,6 @@ export class AwsV4Signer {
 
     if (this.service === 's3') {
       try {
-        /** @type {string} */
         this.encodedPath = decodeURIComponent(this.url.pathname.replace(/\+/g, ' '))
       } catch (e) {
         this.encodedPath = this.url.pathname
@@ -235,6 +233,7 @@ export class AwsV4Signer {
         return true
       })
       .map(pair => pair.map(p => encodeRfc3986(encodeURIComponent(p))))
+      // @ts-expect-error "k1 is possibly undefined" due to overzealous noUncheckedIndexedAccess
       .sort(([k1, v1], [k2, v2]) => k1 < k2 ? -1 : k1 > k2 ? 1 : v1 < v2 ? -1 : v1 > v2 ? 1 : 0)
       .map(pair => pair.join('='))
       .join('&')
@@ -336,12 +335,11 @@ export class AwsV4Signer {
 }
 
 /**
- * @param {string | ArrayBufferView | ArrayBuffer} key
+ * @param {string | BufferSource} key
  * @param {string} string
  * @returns {Promise<ArrayBuffer>}
  */
 async function hmac(key, string) {
-  // @ts-ignore // https://github.com/microsoft/TypeScript/issues/38715
   const cryptoKey = await crypto.subtle.importKey(
     'raw',
     typeof key === 'string' ? encoder.encode(key) : key,
@@ -353,20 +351,30 @@ async function hmac(key, string) {
 }
 
 /**
- * @param {string | ArrayBufferView | ArrayBuffer} content
+ * @param {string | BufferSource} content
  * @returns {Promise<ArrayBuffer>}
  */
 async function hash(content) {
-  // @ts-ignore // https://github.com/microsoft/TypeScript/issues/38715
   return crypto.subtle.digest('SHA-256', typeof content === 'string' ? encoder.encode(content) : content)
 }
 
+const HEX_CHARS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f']
+
 /**
- * @param {ArrayBuffer | ArrayLike<number> | SharedArrayBuffer} buffer
+ * @param {ArrayBufferLike} arrayBuffer
  * @returns {string}
  */
-function buf2hex(buffer) {
-  return Array.prototype.map.call(new Uint8Array(buffer), x => ('0' + x.toString(16)).slice(-2)).join('')
+function buf2hex(arrayBuffer) {
+  const buffer = new Uint8Array(arrayBuffer)
+  let out = ''
+  for (let idx = 0; idx < buffer.length; idx++) {
+    const n = buffer[idx]
+    // @ts-expect-error "n is possibly undefined" due to overzealous noUncheckedIndexedAccess
+    out += HEX_CHARS[(n >>> 4) & 0xF]
+    // @ts-expect-error "n is possibly undefined" due to overzealous noUncheckedIndexedAccess
+    out += HEX_CHARS[n & 0xF]
+  }
+  return out
 }
 
 /**
@@ -380,7 +388,7 @@ function encodeRfc3986(urlEncodedStr) {
 /**
  * @param {URL} url
  * @param {Headers} headers
- * @returns {string[]} [service, region]
+ * @returns {[string, string]} [service, region]
  */
 function guessServiceRegion(url, headers) {
   const { hostname, pathname } = url
@@ -390,10 +398,11 @@ function guessServiceRegion(url, headers) {
   }
   if (hostname.endsWith('.backblazeb2.com')) {
     const match = hostname.match(/^(?:[^.]+\.)?s3\.([^.]+)\.backblazeb2\.com$/)
-    return match != null ? ['s3', match[1]] : ['', '']
+    return match != null ? ['s3', match[1] || ''] : ['', '']
   }
   const match = hostname.replace('dualstack.', '').match(/([^.]+)\.(?:([^.]*)\.)?amazonaws\.com(?:\.cn)?$/)
-  let [service, region] = (match || ['', '']).slice(1, 3)
+  let service = (match && match[1]) || ''
+  let region = match && match[2]
 
   if (region === 'us-gov') {
     region = 'us-gov-west-1'
@@ -424,5 +433,5 @@ function guessServiceRegion(url, headers) {
     ;[service, region] = [region, service]
   }
 
-  return [HOST_SERVICES[service] || service, region]
+  return [HOST_SERVICES[service] || service, region || '']
 }

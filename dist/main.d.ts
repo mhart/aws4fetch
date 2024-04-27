@@ -14,10 +14,12 @@ export class AwsClient {
     sessionToken: string | undefined;
     service: string | undefined;
     region: string | undefined;
-    cache: Map<any, any>;
+    cache: Map<string, ArrayBuffer>;
     retries: number;
     initRetryMs: number;
-    sign(input: RequestInfo, init?: (RequestInit & {
+    sign(input: Request | {
+        toString: () => string;
+    }, init?: (RequestInit & {
         aws?: {
             accessKeyId?: string | undefined;
             secretAccessKey?: string | undefined;
@@ -32,7 +34,9 @@ export class AwsClient {
             singleEncode?: boolean | undefined;
         } | undefined;
     }) | null | undefined): Promise<Request>;
-    fetch(input: RequestInfo, init?: (RequestInit & {
+    fetch(input: Request | {
+        toString: () => string;
+    }, init?: (RequestInit & {
         aws?: {
             accessKeyId?: string | undefined;
             secretAccessKey?: string | undefined;
@@ -75,7 +79,7 @@ export class AwsV4Signer {
     sessionToken: string | undefined;
     service: string;
     region: string;
-    cache: Map<any, any>;
+    cache: Map<string, ArrayBuffer>;
     datetime: string;
     signQuery: boolean | undefined;
     appendSessionToken: boolean;

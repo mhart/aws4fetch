@@ -6,7 +6,7 @@
 
   /**
    * @license MIT <https://opensource.org/licenses/MIT>
-   * @copyright Michael Hart 2022
+   * @copyright Michael Hart 2024
    */
   const encoder = new TextEncoder();
   const HOST_SERVICES = {
@@ -54,7 +54,7 @@
         }
         input = url;
       }
-      const signer = new AwsV4Signer(Object.assign({ url: input }, init, this, init && init.aws));
+      const signer = new AwsV4Signer(Object.assign({ url: input.toString() }, init, this, init && init.aws));
       const signed = Object.assign({}, init, await signer.sign());
       delete signed.aws;
       try {
@@ -234,8 +234,16 @@
   async function hash(content) {
     return crypto.subtle.digest('SHA-256', typeof content === 'string' ? encoder.encode(content) : content)
   }
-  function buf2hex(buffer) {
-    return Array.prototype.map.call(new Uint8Array(buffer), x => ('0' + x.toString(16)).slice(-2)).join('')
+  const HEX_CHARS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'];
+  function buf2hex(arrayBuffer) {
+    const buffer = new Uint8Array(arrayBuffer);
+    let out = '';
+    for (let idx = 0; idx < buffer.length; idx++) {
+      const n = buffer[idx];
+      out += HEX_CHARS[(n >>> 4) & 0xF];
+      out += HEX_CHARS[n & 0xF];
+    }
+    return out
   }
   function encodeRfc3986(urlEncodedStr) {
     return urlEncodedStr.replace(/[!'()*]/g, c => '%' + c.charCodeAt(0).toString(16).toUpperCase())
@@ -247,10 +255,11 @@
     }
     if (hostname.endsWith('.backblazeb2.com')) {
       const match = hostname.match(/^(?:[^.]+\.)?s3\.([^.]+)\.backblazeb2\.com$/);
-      return match != null ? ['s3', match[1]] : ['', '']
+      return match != null ? ['s3', match[1] || ''] : ['', '']
     }
     const match = hostname.replace('dualstack.', '').match(/([^.]+)\.(?:([^.]*)\.)?amazonaws\.com(?:\.cn)?$/);
-    let [service, region] = (match || ['', '']).slice(1, 3);
+    let service = (match && match[1]) || '';
+    let region = match && match[2];
     if (region === 'us-gov') {
       region = 'us-gov-west-1';
     } else if (region === 's3' || region === 's3-accelerate') {
@@ -279,7 +288,7 @@
     } else if (region && /-\d$/.test(service) && !/-\d$/.test(region)) {
   [service, region] = [region, service];
     }
-    return [HOST_SERVICES[service] || service, region]
+    return [HOST_SERVICES[service] || service, region || '']
   }
 
   exports.AwsClient = AwsClient;
