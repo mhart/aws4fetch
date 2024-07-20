@@ -10,15 +10,23 @@ The relevant portions of the code are the import/setup:
 ```js
 import { AwsClient } from 'aws4fetch'
 
-// Assume AWS_* vars have been uploaded via `npx wrangler secret put ...`
-// https://developers.cloudflare.com/workers/configuration/secrets/
-const aws = new AwsClient({ accessKeyId: AWS_ACCESS_KEY_ID, secretAccessKey: AWS_SECRET_ACCESS_KEY })
+// ...
 
-const AWS_REGION = 'us-east-1'
-const LAMBDA_FN = 'my-api-function'
+// Assume AWS_* vars have added to your environment
+// https://developers.cloudflare.com/workers/reference/apis/environment-variables/#secrets
+aws = new AwsClient({
+  accessKeyId: env.AWS_ACCESS_KEY_ID,
+  secretAccessKey: env.AWS_SECRET_ACCESS_KEY,
+})
 
-// https://docs.aws.amazon.com/lambda/latest/api/API_Invoke.html
-const LAMBDA_INVOKE_URL = `https://lambda.${AWS_REGION}.amazonaws.com/2015-03-31/functions/${LAMBDA_FN}/invocations`
+// https://docs.aws.amazon.com/lambda/latest/dg/API_Invoke.html
+const LAMBDA_INVOKE_URL = `https://lambda.us-east-1.amazonaws.com/2015-03-31/functions/${LAMBDA_FN}/invocations`
+
+const lambdaResponse = await aws.fetch(LAMBDA_INVOKE_URL, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify(await toLambdaEvent(request)),
+})
 ```
 
 The conversion from the incoming [`Request`](https://developer.mozilla.org/en-US/docs/Web/API/Request)
@@ -26,7 +34,7 @@ to an API-Gateway-style Lambda event:
 
 ```js
 async function toLambdaEvent(request) {
-  const url = new URL(request.url);
+  const url = new URL(request.url)
   return {
     httpMethod: request.method,
     path: url.pathname,
@@ -54,7 +62,7 @@ if (!lambdaResponse.ok) {
 
 const { statusCode: status, headers, body } = await lambdaResponse.json()
 
-const response = new Response(body, { status, headers })
+return new Response(body, { status, headers })
 ```
 
 ## Deploying to Cloudflare

@@ -1,0 +1,10 @@
+#:schema ../../node_modules/wrangler/config-schema.json
+name = "aws4fetch-example"
+main = "src/index.js"
+compatibility_date = "2024-07-01"
+
+[vars]
+AWS_ACCESS_KEY_ID = "AKIAIOS..."
+
+# Add this via `npx wrangler secret put AWS_SECRET_ACCESS_KEY`
+# AWS_SECRET_ACCESS_KEY = "EXAMPLEKEY..."
