@@ -21,35 +21,35 @@ export class AwsClient {
         toString: () => string;
     }, init?: (RequestInit & {
         aws?: {
-            accessKeyId?: string | undefined;
-            secretAccessKey?: string | undefined;
-            sessionToken?: string | undefined;
-            service?: string | undefined;
-            region?: string | undefined;
-            cache?: Map<string, ArrayBuffer> | undefined;
-            datetime?: string | undefined;
-            signQuery?: boolean | undefined;
-            appendSessionToken?: boolean | undefined;
-            allHeaders?: boolean | undefined;
-            singleEncode?: boolean | undefined;
-        } | undefined;
+            accessKeyId?: string;
+            secretAccessKey?: string;
+            sessionToken?: string;
+            service?: string;
+            region?: string;
+            cache?: Map<string, ArrayBuffer>;
+            datetime?: string;
+            signQuery?: boolean;
+            appendSessionToken?: boolean;
+            allHeaders?: boolean;
+            singleEncode?: boolean;
+        };
     }) | null | undefined): Promise<Request>;
     fetch(input: Request | {
         toString: () => string;
     }, init?: (RequestInit & {
         aws?: {
-            accessKeyId?: string | undefined;
-            secretAccessKey?: string | undefined;
-            sessionToken?: string | undefined;
-            service?: string | undefined;
-            region?: string | undefined;
-            cache?: Map<string, ArrayBuffer> | undefined;
-            datetime?: string | undefined;
-            signQuery?: boolean | undefined;
-            appendSessionToken?: boolean | undefined;
-            allHeaders?: boolean | undefined;
-            singleEncode?: boolean | undefined;
-        } | undefined;
+            accessKeyId?: string;
+            secretAccessKey?: string;
+            sessionToken?: string;
+            service?: string;
+            region?: string;
+            cache?: Map<string, ArrayBuffer>;
+            datetime?: string;
+            signQuery?: boolean;
+            appendSessionToken?: boolean;
+            allHeaders?: boolean;
+            singleEncode?: boolean;
+        };
     }) | null | undefined): Promise<Response>;
 }
 export class AwsV4Signer {
