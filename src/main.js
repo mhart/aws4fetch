@@ -394,17 +394,17 @@ function guessServiceRegion(url, headers) {
   const { hostname, pathname } = url
 
   if (hostname.endsWith('.on.aws')) {
-    const match = hostname.match(/^[^.]+\.lambda-url\.([^.]+)\.on\.aws$/)
+    const match = hostname.match(/^[^.]{1,63}\.lambda-url\.([^.]{1,63})\.on\.aws$/)
     return match != null ? ['lambda', match[1] || ''] : ['', '']
   }
   if (hostname.endsWith('.r2.cloudflarestorage.com')) {
     return ['s3', 'auto']
   }
   if (hostname.endsWith('.backblazeb2.com')) {
-    const match = hostname.match(/^(?:[^.]+\.)?s3\.([^.]+)\.backblazeb2\.com$/)
+    const match = hostname.match(/^(?:[^.]{1,63}\.)?s3\.([^.]{1,63})\.backblazeb2\.com$/)
     return match != null ? ['s3', match[1] || ''] : ['', '']
   }
-  const match = hostname.replace('dualstack.', '').match(/([^.]+)\.(?:([^.]*)\.)?amazonaws\.com(?:\.cn)?$/)
+  const match = hostname.replace('dualstack.', '').match(/([^.]{1,63})\.(?:([^.]{0,63})\.)?amazonaws\.com(?:\.cn)?$/)
   let service = (match && match[1]) || ''
   let region = match && match[2]
 
