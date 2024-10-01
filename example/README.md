@@ -8,6 +8,8 @@ Gateway integration, for example.
 The relevant portions of the code are the import/setup:
 
 ```js
+// to allow importing set the type of the project to "webpack" in wrangler.toml
+// https://developers.cloudflare.com/workers/tooling/wrangler/configuration#per-project
 import { AwsClient } from 'aws4fetch'
 
 // ...
