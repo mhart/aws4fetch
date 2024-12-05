@@ -1,9 +1,10 @@
 {
   "compilerOptions": {
     "target": "ESNext",
+    "skipLibCheck": true,
     "lib": ["ESNext"],
     "moduleResolution": "Bundler",
-    "types": ["@cloudflare/workers-types"],
+    "types": [],
     "checkJs": true,
     "noEmit": true,
     "strict": true,

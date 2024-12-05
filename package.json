@@ -11,6 +11,10 @@
   "main": "dist/aws4fetch.cjs.js",
   "module": "dist/aws4fetch.esm.js",
   "browser": "dist/aws4fetch.umd.js",
+  "types": "dist/main.d.ts",
+  "files": [
+    "dist"
+  ],
   "exports": {
     ".": {
       "import": {
@@ -35,10 +39,6 @@
       }
     }
   },
-  "types": "dist/main.d.ts",
-  "files": [
-    "dist"
-  ],
   "scripts": {
     "declaration": "tsc -p declaration.jsconfig.json && cp dist/main.d.ts dist/main.d.mts",
     "build": "npm run declaration && rollup -c",
@@ -50,6 +50,8 @@
     "integration": "node test/integration.js"
   },
   "devDependencies": {
+    "@babel/eslint-parser": "^7.25.9",
+    "@cloudflare/workers-types": "^4.20241202.0",
     "eslint": "^8.57.0",
     "eslint-config-standard": "^17.1.0",
     "eslint-plugin-import": "^2.29.1",

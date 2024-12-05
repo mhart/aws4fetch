@@ -1,6 +1,7 @@
 {
   "extends": "./jsconfig.json",
   "compilerOptions": {
+    "skipLibCheck": true,
     "declaration": true,
     "noEmit": false,
     "emitDeclarationOnly": true,

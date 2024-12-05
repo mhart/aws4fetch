@@ -2,3 +2,4 @@ node_modules
 example/worker.js
 package-lock.json
 .wrangler
+dist

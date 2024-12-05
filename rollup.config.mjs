@@ -1,4 +1,4 @@
-import pkg from './package.json' with { type: "json" }
+import pkg from './package.json' assert { type: 'json' }
 import cleanup from 'rollup-plugin-cleanup'
 
 export default {
