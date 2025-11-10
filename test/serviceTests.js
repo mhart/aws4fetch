@@ -77,6 +77,10 @@ aa-custom-bucket.s3.us-west-001.backblazeb2.com,s3,us-west-001
 s3.us-west-001.backblazeb2.com,s3,us-west-001
 12345678.r2.cloudflarestorage.com,s3,auto
 aa-custom-bucket.12345678.r2.cloudflarestorage.com,s3,auto
+my-repo.us-sea-1.linodeobjects.com,s3,us-sea-1
+us-sea-1.linodeobjects.com,s3,us-sea-1
+my-space.nyc3.digitaloceanspaces.com,s3,nyc3
+nyc3.digitaloceanspaces.com,s3,nyc3
 ibvt72cx3dkyksnw7jktvkwhme0legmv.lambda-url.us-east-1.on.aws,lambda,us-east-1
   `
   return csv.trim().split('\n').map(line => {

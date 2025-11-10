@@ -404,6 +404,14 @@ function guessServiceRegion(url, headers) {
     const match = hostname.match(/^(?:[^.]{1,63}\.)?s3\.([^.]{1,63})\.backblazeb2\.com$/)
     return match != null ? ['s3', match[1] || ''] : ['', '']
   }
+  if (hostname.endsWith('.linodeobjects.com')) {
+    const match = hostname.match(/^(?:[^.]{1,63}\.)?([^.]{1,63})\.linodeobjects\.com$/)
+    return match != null ? ['s3', match[1] || ''] : ['', '']
+  }
+  if (hostname.endsWith('.digitaloceanspaces.com')) {
+    const match = hostname.match(/^(?:[^.]{1,63}\.)?([^.]{1,63})\.digitaloceanspaces\.com$/)
+    return match != null ? ['s3', match[1] || ''] : ['', '']
+  }
   const match = hostname.replace('dualstack.', '').match(/([^.]{1,63})\.(?:([^.]{0,63})\.)?amazonaws\.com(?:\.cn)?$/)
   let service = (match && match[1]) || ''
   let region = match && match[2]
