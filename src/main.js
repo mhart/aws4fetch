@@ -149,7 +149,7 @@ export class AwsV4Signer {
     if (accessKeyId == null) throw new TypeError('accessKeyId is a required option')
     if (secretAccessKey == null) throw new TypeError('secretAccessKey is a required option')
 
-    this.method = method || (body ? 'POST' : 'GET')
+    this.method = method || (body != null ? 'POST' : 'GET')
     this.url = new URL(url)
     this.headers = new Headers(headers || {})
     this.body = body
