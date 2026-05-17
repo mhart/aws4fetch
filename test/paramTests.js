@@ -47,6 +47,12 @@ export default async() => {
 
   const client = new AwsClient(keys)
 
+  let req = await client.sign(url, { body: '' })
+  assertEqual(req.method, 'POST')
+
+  req = await client.sign(url, { body: null })
+  assertEqual(req.method, 'GET')
+
   const buf = await (await client.sign(url, { body: 'a' })).arrayBuffer()
   assertEqual(decoder.decode(buf), 'a')
 
