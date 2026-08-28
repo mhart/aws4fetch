@@ -73,6 +73,18 @@ export default async() => {
     })).headers.get('authorization')
     assertEqual(authorization, 'AWS4-HMAC-SHA256 Credential=AKIDEXAMPLE/20150830/us-east-1/sqs/aws4_request, SignedHeaders=host;x-amz-content-sha256;x-amz-date, Signature=28cde03d679fcd9082587d2705ea318df3d61f4d5d7006668b039b66f06c750c')
   }
+
+  const originalFetch = globalThis.fetch
+  let attempts = 0
+  globalThis.fetch = async() => new Response(null, { status: ++attempts === 1 ? 408 : 200 })
+
+  try {
+    const response = await new AwsClient({ ...keys, retries: 1, initRetryMs: 1 }).fetch(url)
+    assertEqual(response.status, 200)
+    assertEqual(attempts, 2)
+  } finally {
+    globalThis.fetch = originalFetch
+  }
 }
 
 function assertEqual(actual, expected) {
