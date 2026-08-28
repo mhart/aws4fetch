@@ -115,7 +115,7 @@ export class AwsClient {
         return fetched // No need to await if we're returning anyway
       }
       const res = await fetched
-      if (res.status < 500 && res.status !== 429) {
+      if (res.status < 500 && res.status !== 429 && res.status !== 408) {
         return res
       }
       await new Promise(resolve => setTimeout(resolve, Math.random() * this.initRetryMs * Math.pow(2, i)))
