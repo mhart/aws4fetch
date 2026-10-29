@@ -156,6 +156,7 @@ class AwsV4Signer {
       if (this.sessionToken && this.appendSessionToken) {
         this.url.searchParams.set('X-Amz-Security-Token', this.sessionToken);
       }
+      this.url.search = this.url.search.replace(/\+/g, '%20');
     } else {
       this.headers.set('Authorization', await this.authHeader());
     }
