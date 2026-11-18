@@ -413,6 +413,10 @@ function guessServiceRegion(url, headers) {
   } else if (region === 's3' || region === 's3-accelerate') {
     region = 'us-east-1'
     service = 's3'
+  } else if (region && region.startsWith('s3-')) {
+    // A virtual-hosted bucket on a legacy S3 host with a dash, eg my-bucket.s3-us-west-2.amazonaws.com
+    region = region.slice(3).replace(/^fips-|^external-1/, '')
+    service = 's3'
   } else if (service === 'iot') {
     if (hostname.startsWith('iot.')) {
       service = 'execute-api'
