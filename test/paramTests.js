@@ -73,6 +73,13 @@ export default async() => {
     })).headers.get('authorization')
     assertEqual(authorization, 'AWS4-HMAC-SHA256 Credential=AKIDEXAMPLE/20150830/us-east-1/sqs/aws4_request, SignedHeaders=host;x-amz-content-sha256;x-amz-date, Signature=28cde03d679fcd9082587d2705ea318df3d61f4d5d7006668b039b66f06c750c')
   }
+
+  // A GET or HEAD Request with a Content-Type header has no body to sign
+  for (const method of ['GET', 'HEAD']) {
+    const signed = await client.sign(new Request(url, { method, headers: { 'Content-Type': 'application/json' } }), { aws: { datetime } })
+    assertEqual(signed.method, method)
+    assertEqual(signed.body, null)
+  }
 }
 
 function assertEqual(actual, expected) {

@@ -84,7 +84,8 @@ export class AwsClient {
     if (input instanceof Request) {
       const { method, url, headers, body } = input
       init = Object.assign({ method, url, headers }, init)
-      if (init.body == null && headers.has('Content-Type')) {
+      // A GET or HEAD request has no body, and new Request() refuses one, even an empty ArrayBuffer
+      if (init.body == null && method !== 'GET' && method !== 'HEAD' && headers.has('Content-Type')) {
         init.body = body != null && headers.has('X-Amz-Content-Sha256') ? body : await input.clone().arrayBuffer()
       }
       input = url
