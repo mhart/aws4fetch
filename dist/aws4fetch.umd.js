@@ -47,8 +47,8 @@
     }
     async sign(input, init) {
       if (input instanceof Request) {
-        const { method, url, headers, body } = input;
-        init = Object.assign({ method, url, headers }, init);
+        const { method, url, headers, body, signal, redirect } = input;
+        init = Object.assign({ method, url, headers, signal, redirect }, init);
         if (init.body == null && headers.has('Content-Type')) {
           init.body = body != null && headers.has('X-Amz-Content-Sha256') ? body : await input.clone().arrayBuffer();
         }

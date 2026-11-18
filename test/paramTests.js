@@ -73,6 +73,14 @@ export default async() => {
     })).headers.get('authorization')
     assertEqual(authorization, 'AWS4-HMAC-SHA256 Credential=AKIDEXAMPLE/20150830/us-east-1/sqs/aws4_request, SignedHeaders=host;x-amz-content-sha256;x-amz-date, Signature=28cde03d679fcd9082587d2705ea318df3d61f4d5d7006668b039b66f06c750c')
   }
+
+  // The signal and the redirect mode of a Request input stay on the signed Request
+  const controller = new AbortController()
+  const signedRequest = await client.sign(new Request(url, { signal: controller.signal, redirect: 'manual' }))
+  assertEqual(signedRequest.signal.aborted, false)
+  controller.abort()
+  assertEqual(signedRequest.signal.aborted, true)
+  assertEqual(signedRequest.redirect, 'manual')
 }
 
 function assertEqual(actual, expected) {
