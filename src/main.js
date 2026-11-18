@@ -17,6 +17,7 @@ const HOST_SERVICES = {
   'git-codecommit': 'codecommit',
   'mturk-requester-sandbox': 'mturk-requester',
   'personalize-runtime': 'personalize',
+  's3-accesspoint': 's3',
 }
 
 // https://github.com/aws/aws-sdk-js/blob/cc29728c1c4178969ebabe3bbe6b6f3159436394/lib/signers/v4.js#L190-L198
