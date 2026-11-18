@@ -14,6 +14,7 @@ const HOST_SERVICES = {
   'git-codecommit': 'codecommit',
   'mturk-requester-sandbox': 'mturk-requester',
   'personalize-runtime': 'personalize',
+  's3-accesspoint': 's3',
 };
 const UNSIGNABLE_HEADERS = new Set([
   'authorization',

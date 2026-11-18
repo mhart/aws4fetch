@@ -20,6 +20,9 @@ aa-custom-endpoint.appsync.us-east-1.amazonaws.com,appsync,us-east-1
 aa-custom-bucket.s3.amazonaws.com,s3,us-east-1
 aa-custom-bucket.s3-accelerate.amazonaws.com,s3,us-east-1
 aa-custom-bucket.s3-accelerate.dualstack.amazonaws.com,s3,us-east-1
+aa-custom-ap-111122223333.s3-accesspoint.us-west-2.amazonaws.com,s3,us-west-2
+aa-custom-ap-111122223333.s3-accesspoint.dualstack.us-west-2.amazonaws.com,s3,us-west-2
+aa-custom-ap-111122223333.s3-accesspoint-fips.us-east-1.amazonaws.com,s3,us-east-1
 ap-northeast-1.queue.amazonaws.com,sqs,ap-northeast-1
 api.pricing.us-east-1.amazonaws.com,pricing,us-east-1
 appstream2.us-west-2.amazonaws.com,appstream,us-west-2
